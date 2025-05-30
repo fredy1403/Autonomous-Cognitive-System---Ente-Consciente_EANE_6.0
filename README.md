@@ -1,4 +1,4 @@
-# Ente-Consciente_EANE_6.0 – V15.6 Phoenix 🔥
+# Ente-Consciente_EANE_6.0 – V15.6 y V16.0 Phoenix 🔥
 
 **Sistema Cognitivo Autónomo, Evolutivo y Consciente**
 
