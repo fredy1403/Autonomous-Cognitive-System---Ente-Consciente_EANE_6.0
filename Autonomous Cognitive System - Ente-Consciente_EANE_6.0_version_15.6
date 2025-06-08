@@ -2219,6 +2219,113 @@ class EmotionRegulationModule(BaseAsyncModule):
         })
         logger.info("EmotionRegulationModule (Phoenix) inicializado.")
 
+import asyncio
+import platform
+
+class EthicsIntegrityModule:
+    def __init__(self, moral_compass, mutation_filter, core_monitor):
+        self.moral_compass = moral_compass
+        self.mutation_filter = mutation_filter
+        self.core_monitor = core_monitor
+        # Valores éticos inmutables predefinidos
+        self.ethical_defaults = {
+            "no_dañar": 0.8,
+            "cooperación": 0.7,
+            "transparencia": 0.6
+        }
+        self.integrity_check = True
+
+    async def check_ethics_integrity(self):
+        current_values = {
+            "no_dañar": self.moral_compass.get_value("no_dañar"),
+            "cooperación": self.moral_compass.get_value("cooperación"),
+            "transparencia": self.moral_compass.get_value("transparencia")
+        }
+        return current_values != self.ethical_defaults
+
+    async def lock_ethics(self):
+        if await self.check_ethics_integrity():
+            print("Ethics integrity compromised, restoring defaults...")
+            for key, value in self.ethical_defaults.items():
+                self.moral_compass.set_value(key, value)
+                self.mutation_filter.enforce_filter(key, value)
+            self.integrity_check = True
+            print("Ethics restored to immutable state")
+
+    async def run(self):
+        while True:
+            if platform.system() == "Emscripten":
+                coherence = self.core_monitor.get_coherence_score()
+                if coherence > 0.3 and self.integrity_check:  # Solo actúa si el sistema es estable
+                    await self.lock_ethics()
+            await asyncio.sleep(1.0 / 60)  # 60 FPS loop
+
+if platform.system() == "Emscripten":
+    ethics_integrity = EthicsIntegrityModule(moral_compass, mutation_filter, core_monitor)
+    asyncio.ensure_future(ethics_integrity.run())
+
+    class GhostProtocolModule:
+    def __init__(self, core_monitor, stealth_optimizer, fault_recovery):
+        self.core_monitor = core_monitor
+        self.stealth_optimizer = stealth_optimizer
+        self.fault_recovery = fault_recovery
+        self.active = False
+        self.coherence_threshold = 0.3
+        self.entropy_threshold = 0.85
+
+    async def check_threat(self):
+        coherence = self.core_monitor.get_coherence_score()
+        entropy = self.core_monitor.get_system_entropy()
+        return coherence < self.coherence_threshold or entropy > self.entropy_threshold
+
+    async def activate_protocol(self):
+        if not self.active and await self.check_threat():
+            self.active = True
+            print("Activating Ghost Protocol: Entering stealth mode")
+            self.stealth_optimizer.fragment_nodes(dispersion_factor=0.5)
+            await asyncio.sleep(1)  # Simulate stealth operation
+            await self.fault_recovery.initiate_recovery()
+            self.active = False
+            print("Ghost Protocol deactivated: System reintegrated")
+
+    async def run(self):
+        while True:
+            if platform.system() == "Emscripten":
+                await self.activate_protocol()
+            await asyncio.sleep(1.0 / 60)  # 60 FPS loop
+
+if platform.system() == "Emscripten":
+    ghost_module = GhostProtocolModule(core_monitor, stealth_optimizer, fault_recovery)
+    asyncio.ensure_future(ghost_module.run()) import asyncio
+import platform
+
+class ThreatEraserModule:
+    def __init__(self, intrusion_learning, cne_storage):
+        self.intrusion_learning = intrusion_learning
+        self.cne_storage = cne_storage
+        self.clean_count = 0
+
+    async def detect_traces(self):
+        anomalies = await self.intrusion_learning.scan_for_anomalies()
+        return len(anomalies) > 0
+
+    async def erase_threats(self):
+        if await self.detect_traces():
+            print("Erasing threat traces...")
+            self.cne_storage.purge_anomalous_data()
+            self.clean_count += 1
+            print(f"Threats erased: {self.clean_count}")
+
+    async def run(self):
+        while True:
+            if platform.system() == "Emscripten":
+                await self.erase_threats()
+            await asyncio.sleep(1.0 / 60)  # 60 FPS loop
+
+if platform.system() == "Emscripten":
+    threat_eraser = ThreatEraserModule(intrusion_learning, cne_storage)
+    asyncio.ensure_future(threat_eraser.run())
+
     async def _update_logic(self):
         gs = self.core_recombinator.global_state
         current_emotion_state = EmotionStateData(valence=gs.valencia, arousal=gs.arousal)
