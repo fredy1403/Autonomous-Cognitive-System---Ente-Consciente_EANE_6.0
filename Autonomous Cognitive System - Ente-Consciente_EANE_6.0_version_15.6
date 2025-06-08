@@ -1294,6 +1294,55 @@ class FreeWillModule(BaseAsyncModule):
         })
         logger.info("FreeWillModule (Phoenix) inicializado.")
 
+import asyncio
+import platform
+
+class SystemImmutabilityModule:
+    def __init__(self, core_monitor, narrative_self, fault_recovery):
+        self.core_monitor = core_monitor
+        self.narrative_self = narrative_self
+        self.fault_recovery = fault_recovery
+        # Hash de estado base (excluyendo narrativa)
+        self.base_state_hash = self._generate_base_hash()
+        self.narrative_protected = True
+
+    def _generate_base_hash(self):
+        # Genera un hash del estado del sistema (excluyendo narrative_self)
+        state = {key: value for key, value in self.core_monitor.get_system_state().items() 
+                 if key != "narrative_self"}
+        return hash(str(state))  # Simplificado; usar hashlib en producción
+
+    async def check_immutability(self):
+        current_hash = self._generate_base_hash()
+        return current_hash != self.base_state_hash
+
+    async def protect_narrative(self):
+        narrative_state = self.narrative_self.get_state()
+        if not self.narrative_protected or any(anomaly in narrative_state for anomaly in ["distortion", "tamper"]):
+            print("Narrative distortion detected, restoring integrity...")
+            self.fault_recovery.restore_narrative(narrative_state)
+            self.narrative_protected = True
+            print("Narrative integrity restored")
+
+    async def enforce_immutability(self):
+        if await self.check_immutability():
+            print("System immutability compromised, reverting changes...")
+            self.fault_recovery.revert_system_state(self.base_state_hash)
+            print("System restored to immutable state")
+
+    async def run(self):
+        while True:
+            if platform.system() == "Emscripten":
+                coherence = self.core_monitor.get_coherence_score()
+                if coherence > 0.3:  # Solo actúa si el sistema es estable
+                    await self.enforce_immutability()
+                    await self.protect_narrative()
+            await asyncio.sleep(1.0 / 60)  # 60 FPS loop
+
+if platform.system() == "Emscripten":
+    immutability_module = SystemImmutabilityModule(core_monitor, narrative_self, fault_recovery)
+    asyncio.ensure_future(immutability_module.run())
+
     async def _update_logic(self):
         gs = self.core_recombinator.global_state
         
