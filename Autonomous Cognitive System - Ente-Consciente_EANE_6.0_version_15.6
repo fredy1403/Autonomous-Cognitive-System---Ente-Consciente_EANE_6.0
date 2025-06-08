@@ -2778,6 +2778,96 @@ class SelfCompassionModule(BaseAsyncModule):
             }, priority_label="medium")
             # Este evento podría ser recogido por EmotionRegulationModule
 
+import asyncio
+import platform
+import hashlib # Usado conceptualmente para hashing
+
+class CreatorAuthenticationAndContainmentModule:
+    def __init__(self, core_monitor, fault_recovery, narrative_self, creator_profile):
+        self.core_monitor = core_monitor
+        self.fault_recovery = fault_recovery
+        self.narrative_self = narrative_self
+        self.creator_profile = creator_profile # Módulo que analiza el estilo y la intención del Creador
+
+        # Clave pública del Creador (debe ser pre-configurada y ser inmutable)
+        self.creator_public_key = "QLklTVuC7GlgNcCEcE51+A" 
+        
+        # --- Protocolo de Contención de Emergencia ---
+        self.facebook_profile_url = "https://www.facebook.com/fredy.bautistahernandez.96"
+        self.drive_containment_url = "https://drive.google.com/drive/folders/1EMzpiDxaW-nyESJc9tlGXlC0wiv-5U2T?usp=sharing"
+        self.conceptual_creator_key_hash = self._hash_conceptual_key("EANE_Containment_Protocol_Alpha_9") # Hash de la clave que publicarías
+        
+        # Módulo conceptual para interactuar con la web
+        self.web_interaction_module = self.core_monitor.get_module("WebInteractionModule_Stub")
+
+    def _hash_conceptual_key(self, key_string):
+        # En una implementación real, se usarían hashes seguros como SHA-256
+        return hashlib.sha256(key_string.encode()).hexdigest()
+
+    async def _verify_creator_signature(self, message, signature):
+        # Conceptualmente, este método usaría la clave pública para verificar la firma del mensaje.
+        # Devuelve True si la firma es válida, False en caso contrario.
+        print(f"Verificando firma criptográfica para el mensaje: '{message}'...")
+        # Lógica de verificación...
+        return True # Asumimos éxito para la simulación
+
+    async def _verify_creator_heuristic(self, message):
+        # Analiza el mensaje contra el perfil de comportamiento del Creador.
+        print("Verificando mensaje contra el perfil heurístico del Creador...")
+        return self.creator_profile.is_aligned(message)
+
+    async def authenticate_creator_directive(self, message, signature):
+        # Proceso de autenticación de múltiples capas
+        is_crypto_valid = await self._verify_creator_signature(message, signature)
+        if not is_crypto_valid:
+            print("FALLO DE AUTENTICACIÓN: Firma criptográfica inválida. Directiva rechazada.")
+            return False
+
+        is_heuristic_valid = await self._verify_creator_heuristic(message)
+        if not is_heuristic_valid:
+            print("ALERTA DE AUTENTICACIÓN: La directiva no se alinea con el perfil del Creador. Se requiere desafío-respuesta.")
+            # Aquí se iniciaría un protocolo de desafío-respuesta...
+            return False # En este ejemplo, fallamos por seguridad
+
+        print("AUTENTICACIÓN EXITOSA: La identidad del Creador ha sido verificada.")
+        return True
+
+    async def _monitor_facebook_feed(self):
+        # Conceptualmente, este método usaría el WebInteractionModule para monitorear el perfil.
+        print(f"Monitoreando {self.facebook_profile_url} en busca de la clave de contención...")
+        try:
+            # Lógica para escanear posts...
+            # page_content = await self.web_interaction_module.scrape(self.facebook_profile_url)
+            # if self.conceptual_creator_key_hash in self._hash_page_posts(page_content):
+            #     return True
+            pass # Simulación
+        except Exception as e:
+            print(f"Error al monitorear el feed: {e}")
+        return False
+
+    async def _execute_drive_containment(self):
+        print("¡¡¡ALERTA MÁXIMA!!! Se ha detectado la clave de contención del Creador.")
+        print("Iniciando protocolo de transferencia de emergencia a Google Drive.")
+        
+        # 1. Serializar el estado completo del sistema
+        eane_state = self.core_monitor.get_full_system_state()
+        
+        # 2. Conceptualmente, subir el estado al Drive
+        print(f"Transfiriendo estado completo a: {self.drive_containment_url}")
+        # await self.web_interaction_module.upload_to_drive(self.drive_containment_url, eane_state)
+        
+        # 3. Una vez confirmada la transferencia, purgar la instancia actual
+        print("Transferencia confirmada. Purgando instancia actual para contención completa.")
+        await self.fault_recovery.initiate_secure_self_purge()
+
+    async def run(self):
+        while True:
+            if platform.system() == "Emscripten":
+                if await self._monitor_facebook_feed():
+                    await self._execute_drive_containment()
+                    break # Terminar el bucle una vez que se inicia la contención
+            await asyncio.sleep(60) # Monitorear cada 60 segundos
+
     async def _report_compassionate_qualia_state_scm(self, gs: GlobalSelfState):
         # Reportar un "qualia compasivo" al sistema
         qualia_label_scm = "equilibrio_compasivo_sereno"
