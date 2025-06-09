@@ -6603,5 +6603,583 @@ class StochasticSimulator_SSM:
             return None
     # ... más simulaciones estocásticas (caminatas aleatorias, cadenas de Markov, etc.) ...
 
+#modulo vpn para navegacion a internet
+import asyncio
+import numpy as np
+from datetime import datetime
+from typing import Dict, Any, List
+from dataclasses import dataclass, field
+import logging
+from collections import deque
+import uuid
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+import hashlib
+
+# Configuración de logging
+logging.basicConfig(
+    filename="snvpn_module.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger("SecureNavigationVPNModule")
+
+# Estado del módulo
+@dataclass
+class SNVPNState:
+    encryption_status: str = "inactive"
+    tunnel_status: str = "disconnected"
+    anonymization_score: float = 0.0
+    threat_probability: float = 0.0
+    selected_server: str = None
+    key_entropy: float = 0.0
+    timestamp: float = field(default_factory=lambda: datetime.now().timestamp())
+    node_states: Dict[str, Any] = field(default_factory=dict)
+    cycle_num: int = 0
+
+# Clase base para módulos EANE
+class BaseAsyncModule:
+    def __init__(self, core_recombinator, update_interval=1.0):
+        self.core_recombinator = core_recombinator
+        self.update_interval = update_interval
+        self.module_name = self.__class__.__name__
+        self.module_state: Dict[str, Any] = {"status": "initialized", "last_active_cycle": -1}
+        self._active = False
+        self._task = None
+        self.is_dormant = False
+        self.time_since_last_meaningful_activity = 0.0
+        logger.info(f"Módulo {self.module_name} inicializado.")
+
+    async def start(self):
+        self._active = True
+        if not self._task or self._task.done():
+            self._task = asyncio.create_task(self._run_loop())
+
+    async def stop(self):
+        self._active = False
+        if self._task:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+        self.module_state["status"] = "stopped"
+
+    async def _run_loop(self):
+        while self._active:
+            try:
+                start_time = datetime.now().timestamp()
+                if not self.is_dormant:
+                    await self._update_logic()
+                    self.module_state["last_active_cycle"] = self.core_recombinator.current_cycle_num
+                    self.time_since_last_meaningful_activity = 0.0
+                else:
+                    await self._dormant_logic()
+                    self.time_since_last_meaningful_activity += self.update_interval
+                processing_time = datetime.now().timestamp() - start_time
+                await asyncio.sleep(max(0, self.update_interval - processing_time))
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error en {self.module_name}: {e}")
+                await asyncio.sleep(self.update_interval * 2)
+
+    async def _update_logic(self):
+        raise NotImplementedError(f"_update_logic no implementado en {self.module_name}")
+
+    async def _dormant_logic(self):
+        await asyncio.sleep(self.update_interval * 0.9)
+
+    def get_state(self) -> Dict[str, Any]:
+        return self.module_state.copy()
+
+# Módulo SecureNavigationVPNModule
+class SecureNavigationVPNModule(BaseAsyncModule):
+    def __init__(self, core_recombinator, update_interval=2.0):
+        super().__init__(core_recombinator, update_interval)
+        self.module_name = "SecureNavigationVPNModule"
+        self.state = SNVPNState()
+        self.node_states = {
+            "encryption": {"active": True, "key": None, "entropy": 0.0, "subnodes": deque(maxlen=10)},
+            "tunnel": {"active": True, "server": None, "status": "disconnected"},
+            "anonymization": {"active": True, "score": 0.0, "threat_prob": 0.0}
+        }
+        self.server_list = [
+            {"id": "server1", "ip": "192.168.1.1", "trust_score": 0.9, "latency": 50},
+            {"id": "server2", "ip": "192.168.1.2", "trust_score": 0.85, "latency": 70},
+            {"id": "server3", "ip": "192.168.1.3", "trust_score": 0.95, "latency": 40}
+        ]
+        self.key = None
+        self.nonce = None
+        logger.info(f"{self.module_name} inicializado con nodos Encriptación, Túnel y Anonimización.")
+
+    async def _update_logic(self):
+        """
+        Lógica principal, ejecutada asíncronamente.
+        Coordina nodos Encriptación, Túnel y Anonimización.
+        """
+        self.state.cycle_num += 1
+        start_time = datetime.now().timestamp()
+
+        # Ejecutar nodos
+        await self._encryption_node()
+        await self._tunnel_node()
+        await self._anonymization_node()
+
+        # Actualizar estado global
+        self.state.timestamp = datetime.now().timestamp()
+        self.module_state["status"] = "running"
+        self.module_state["cycle_num"] = self.state.cycle_num
+        self.module_state["encryption_status"] = self.state.encryption_status
+        self.module_state["tunnel_status"] = self.state.tunnel_status
+        self.module_state["anonymization_score"] = self.state.anonymization_score
+
+        # Reportar al CoreRecombinator
+        await self.core_recombinator.event_queue_put({
+            "module": self.module_name,
+            "event": "update",
+            "data": self.get_state()
+        })
+
+        logger.info(f"Ciclo {self.state.cycle_num} completado en {self.module_name}. "
+                    f"Anonymization_score: {self.state.anonymization_score:.3f}, "
+                    f"Tiempo: {self.state.timestamp - start_time:.3f}s")
+
+    async def _encryption_node(self):
+        """
+        Nodo Encriptación: Genera claves AES-256 y calcula entropía.
+        Ecuación: H(K) = -Σ p(k_i) log_2 p(k_i)
+        """
+        if not self.key:
+            # Generar clave y nonce
+            self.key = get_random_bytes(32)  # Clave AES-256
+            self.nonce = get_random_bytes(12)  # Nonce para GCM
+            self.state.encryption_status = "active"
+
+            # Calcular entropía de la clave
+            key_bytes = np.frombuffer(self.key, dtype=np.uint8)
+            probs = np.histogram(key_bytes, bins=256, density=True)[0]
+            probs = probs[probs > 0]
+            entropy = -np.sum(probs * np.log2(probs))
+            self.state.key_entropy = entropy
+            self.node_states["encryption"]["entropy"] = entropy
+            self.node_states["encryption"]["key"] = hashlib.sha256(self.key).hexdigest()  # Hash para logging
+
+            # Ramificación: Crear subnodo si entropía es alta
+            if entropy > 7.5:  # Umbral para clave robusta
+                self.node_states["encryption"]["subnodes"].append({
+                    "entropy": entropy,
+                    "timestamp": self.state.timestamp
+                })
+                logger.info(f"Subnodo creado en Encriptación: Entropía {entropy:.3f}")
+            else:
+                if len(self.node_states["encryption"]["subnodes"]) > 2:
+                    self.node_states["encryption"]["subnodes"].popleft()
+                    logger.info("Colapso de subnodo en Encriptación: Entropía baja.")
+
+        # Simular encriptación de datos
+        cipher = AES.new(self.key, AES.MODE_GCM, nonce=self.nonce)
+        data = b"Navigation data for EANE"
+        ciphertext, tag = cipher.encrypt_and_digest(data)
+        logger.info(f"Nodo Encriptación actualizado. Entropía: {self.state.key_entropy:.3f}")
+
+    async def _tunnel_node(self):
+        """
+        Nodo Túnel: Establece conexión con servidor seleccionado.
+        """
+        if self.state.tunnel_status == "disconnected" and self.state.selected_server:
+            # Simular conexión al servidor
+            server = next((s for s in self.server_list if s["id"] == self.state.selected_server), None)
+            if server:
+                self.state.tunnel_status = "connected"
+                self.node_states["tunnel"]["server"] = server["ip"]
+                self.node_states["tunnel"]["status"] = "connected"
+                logger.info(f"Túnel establecido con {server['id']} ({server['ip']})")
+            else:
+                logger.warning("Servidor no encontrado para establecer túnel.")
+
+        # Ramificación: Crear subnodo para conexiones estables
+        if self.state.tunnel_status == "connected":
+            self.node_states["tunnel"]["subnodes"].append({
+                "server": self.state.selected_server,
+                "timestamp": self.state.timestamp
+            })
+            logger.info("Subnodo creado en Túnel: Conexión estable.")
+        else:
+            if len(self.node_states["tunnel"]["subnodes"]) > 2:
+                self.node_states["tunnel"]["subnodes"].popleft()
+                logger.info("Colapso de subnodo en Túnel: Sin conexión.")
+
+    async def _anonymization_node(self):
+        """
+        Nodo Anonimización: Selecciona servidor seguro y calcula probabilidad de amenaza.
+        Ecuación: p(θ|D) ∝ p(D|θ) p(θ) para selección de servidor
+        """
+        # Modelo bayesiano para seleccionar servidor
+        prior = {s["id"]: s["trust_score"] for s in self.server_list}
+        likelihood = {s["id"]: np.exp(-s["latency"] / 100) for s in self.server_list}  # Latency-based
+        posterior = {}
+        for server_id in prior:
+            posterior[server_id] = prior[server_id] * likelihood[server_id]
+        total = sum(posterior.values())
+        if total > 0:
+            for server_id in posterior:
+                posterior[server_id] /= total
+
+        # Seleccionar servidor con mayor probabilidad
+        selected_server = max(posterior, key=posterior.get)
+        self.state.selected_server = selected_server
+        self.state.anonymization_score = posterior[selected_server]
+
+        # Calcular probabilidad de amenaza
+        traffic_anomaly = np.random.uniform(0, 0.1)  # Simulación de anomalías
+        threat_prob = 1 / (1 + np.exp(-10 * (traffic_anomaly - 0.05)))  # Logística
+        self.state.threat_probability = threat_prob
+        self.node_states["anonymization"]["score"] = self.state.anonymization_score
+        self.node_states["anonymization"]["threat_prob"] = threat_prob
+
+        # Ramificación: Crear subnodo para alta anonimización
+        if self.state.anonymization_score > 0.8:
+            self.node_states["anonymization"]["subnodes"].append({
+                "server": selected_server,
+                "score": self.state.anonymization_score,
+                "timestamp": self.state.timestamp
+            })
+            logger.info(f"Subnodo creado en Anonimización: Score {self.state.anonymization_score:.3f}")
+        else:
+            if len(self.node_states["anonymization"]["subnodes"]) > 2:
+                self.node_states["anonymization"]["subnodes"].popleft()
+                logger.info("Colapso de subnodo en Anonimización: Score bajo.")
+
+        logger.info(f"Nodo Anonimización actualizado. Server: {selected_server}, Score: {self.state.anonymization_score:.3f}")
+
+    def get_state(self) -> Dict[str, Any]:
+        """
+        Retorna estado completo.
+        """
+        return {
+            "module_name": self.module_name,
+            "status": self.module_state["status"],
+            "cycle_num": self.state.cycle_num,
+            "encryption_status": self.state.encryption_status,
+            "tunnel_status": self.state.tunnel_status,
+            "anonymization_score": self.state.anonymization_score,
+            "threat_probability": self.state.threat_probability,
+            "selected_server": self.state.selected_server,
+            "key_entropy": self.state.key_entropy,
+            "node_states": self.node_states,
+            "timestamp": self.state.timestamp
+        }
+#modulo de comunicacion blindada interna
+import asyncio
+import numpy as np
+from datetime import datetime
+from typing import Dict, Any, List
+from dataclasses import dataclass, field
+import logging
+from collections import deque
+import uuid
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+import hashlib
+
+# Configuración de logging
+logging.basicConfig(
+    filename="ircm_module.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger("InternalResonantCommunicationModule")
+
+# Estado del módulo
+@dataclass
+class IRCMState:
+    transmission_latency: float = 0.0
+    coherence_score: float = 0.0
+    security_score: float = 0.0
+    message_queue_size: int = 0
+    intrusion_probability: float = 0.0
+    timestamp: float = field(default_factory=lambda: datetime.now().timestamp())
+    node_states: Dict[str, Any] = field(default_factory=dict)
+    cycle_num: int = 0
+
+# Clase base para módulos EANE
+class BaseAsyncModule:
+    def __init__(self, core_recombinator, update_interval=1.0):
+        self.core_recombinator = core_recombinator
+        self.update_interval = update_interval
+        self.module_name = self.__class__.__name__
+        self.module_state: Dict[str, Any] = {"status": "initialized", "last_active_cycle": -1}
+        self._active = False
+        self._task = None
+        self.is_dormant = False
+        self.time_since_last_meaningful_activity = 0.0
+        logger.info(f"Módulo {self.module_name} inicializado.")
+
+    async def start(self):
+        self._active = True
+        if not self._task or self._task.done():
+            self._task = asyncio.create_task(self._run_loop())
+
+    async def stop(self):
+        self._active = False
+        if self._task:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+        self.module_state["status"] = "stopped"
+
+    async def _run_loop(self):
+        while self._active:
+            try:
+                start_time = datetime.now().timestamp()
+                if not self.is_dormant:
+                    await self._update_logic()
+                    self.module_state["last_active_cycle"] = self.core_recombinator.current_cycle_num
+                    self.time_since_last_meaningful_activity = 0.0
+                else:
+                    await self._dormant_logic()
+                    self.time_since_last_meaningful_activity += self.update_interval
+                processing_time = datetime.now().timestamp() - start_time
+                await asyncio.sleep(max(0, self.update_interval - processing_time))
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error en {self.module_name}: {e}")
+                await asyncio.sleep(self.update_interval * 2)
+
+    async def _update_logic(self):
+        raise NotImplementedError(f"_update_logic no implementado en {self.module_name}")
+
+    async def _dormant_logic(self):
+        await asyncio.sleep(self.update_interval * 0.9)
+
+    def get_state(self) -> Dict[str, Any]:
+        return self.module_state.copy()
+
+# Módulo InternalResonantCommunicationModule
+class InternalResonantCommunicationModule(BaseAsyncModule):
+    def __init__(self, core_recombinator, update_interval=1.5):
+        super().__init__(core_recombinator, update_interval)
+        self.module_name = "InternalResonantCommunicationModule"
+        self.state = IRCMState()
+        self.node_states = {
+            "transmission": {"active": True, "latency": 0.0, "subnodes": deque(maxlen=10)},
+            "coherence": {"active": True, "mutual_info": 0.0, "subnodes": deque(maxlen=10)},
+            "security": {"active": True, "intrusion_prob": 0.0, "key": None}
+        }
+        self.message_queue = deque(maxlen=100)  # Cola de mensajes internos
+        self.key = None
+        self.nonce = None
+        logger.info(f"{self.module_name} inicializado con nodos Transmisión, Coherencia y Seguridad.")
+
+    async def _update_logic(self):
+        """
+        Lógica principal, ejecutada asíncronamente.
+        Coordina nodos Transmisión, Coherencia y Seguridad.
+        """
+        self.state.cycle_num += 1
+        start_time = datetime.now().timestamp()
+
+        # Procesar mensajes en la cola
+        await self._transmission_node()
+        await self._coherence_node()
+        await self._security_node()
+
+        # Actualizar estado global
+        self.state.message_queue_size = len(self.message_queue)
+        self.state.timestamp = datetime.now().timestamp()
+        self.module_state["status"] = "running"
+        self.module_state["cycle_num"] = self.state.cycle_num
+        self.module_state["transmission_latency"] = self.state.transmission_latency
+        self.module_state["coherence_score"] = self.state.coherence_score
+        self.module_state["security_score"] = self.state.security_score
+
+        # Reportar al CoreRecombinator
+        await self.core_recombinator.event_queue_put({
+            "module": self.module_name,
+            "event": "update",
+            "data": self.get_state()
+        })
+
+        logger.info(f"Ciclo {self.state.cycle_num} completado en {self.module_name}. "
+                    f"Coherence_score: {self.state.coherence_score:.3f}, "
+                    f"Latency: {self.state.transmission_latency:.3f}s, "
+                    f"Tiempo: {self.state.timestamp - start_time:.3f}s")
+
+    async def _transmission_node(self):
+        """
+        Nodo Transmisión: Gestiona enrutamiento de mensajes con mínima latencia.
+        Ecuación: L = λ / (μ - λ) (teoría de colas M/M/1)
+        """
+        # Simular llegada y servicio de mensajes (Poisson)
+        arrival_rate = 10  # λ: mensajes por segundo
+        service_rate = 15  # μ: mensajes procesados por segundo
+        if service_rate > arrival_rate:
+            latency = arrival_rate / (service_rate - arrival_rate)
+        else:
+            latency = 1.0  # Fallback si el sistema está saturado
+        self.state.transmission_latency = latency
+        self.node_states["transmission"]["latency"] = latency
+
+        # Procesar mensajes en la cola
+        if self.message_queue:
+            message = self.message_queue.popleft()
+            sender, receiver, content = message["sender"], message["receiver"], message["content"]
+            # Simular envío (en producción, usar CoreRecombinator)
+            logger.info(f"Mensaje enviado de {sender} a {receiver}: {content[:20]}...")
+
+            # Ramificación: Crear subnodo para mensajes críticos
+            if "priority" in message and message["priority"] == "high":
+                self.node_states["transmission"]["subnodes"].append({
+                    "message_id": message.get("id", str(uuid.uuid4())),
+                    "timestamp": self.state.timestamp
+                })
+                logger.info("Subnodo creado en Transmisión: Mensaje prioritario.")
+            else:
+                if len(self.node_states["transmission"]["subnodes"]) > 2:
+                    self.node_states["transmission"]["subnodes"].popleft()
+                    logger.info("Colapso de subnodo en Transmisión: Sin mensajes prioritarios.")
+
+        # Simular nuevo mensaje
+        self.message_queue.append({
+            "id": str(uuid.uuid4()),
+            "sender": "ConsciousnessModule",
+            "receiver": "NarrativeSelf",
+            "content": "Estado actualizado",
+            "priority": "normal",
+            "timestamp": self.state.timestamp
+        })
+
+        logger.info(f"Nodo Transmisión actualizado. Latency: {latency:.3f}s")
+
+    async def _coherence_node(self):
+        """
+        Nodo Coherencia: Mantiene integridad semántica con información mutua.
+        Ecuación: I(X;Y) = Σ p(x,y) log_2(p(x,y) / (p(x)p(y)))
+        """
+        modules = self.core_recombinator.modules
+        module_names = list(modules.keys())
+        if len(module_names) < 2:
+            logger.warning("Insuficientes módulos para calcular coherencia.")
+            return
+
+        # Recolectar estados
+        states = {name: mod.get_state() for name, mod in modules.items()}
+        mutual_info_total = 0.0
+        interaction_count = 0
+
+        # Calcular información mutua para mensajes recientes
+        for message in list(self.message_queue)[-5:]:  # Últimos 5 mensajes
+            sender, receiver = message["sender"], message["receiver"]
+            if sender in states and receiver in states:
+                p_xy = self._simulate_joint_distribution(states[sender], states[receiver])
+                p_x = np.sum(p_xy, axis=1)
+                p_y = np.sum(p_xy, axis=0)
+                p_x = np.clip(p_x, 1e-10, 1.0)
+                p_y = np.clip(p_y, 1e-10, 1.0)
+                p_xy = np.clip(p_xy, 1e-10, 1.0)
+                mutual_info = np.sum(p_xy * np.log2(p_xy / (p_x[:, None] * p_y)))
+                mutual_info = max(0.0, mutual_info)
+                mutual_info_total += mutual_info
+                interaction_count += 1
+
+        # Actualizar coherence_score
+        self.state.coherence_score = mutual_info_total / max(1, interaction_count)
+        self.node_states["coherence"]["mutual_info"] = self.state.coherence_score
+
+        # Ramificación: Crear subnodo para alta coherencia
+        if self.state.coherence_score > 0.5:
+            self.node_states["coherence"]["subnodes"].append({
+                "coherence_score": self.state.coherence_score,
+                "timestamp": self.state.timestamp
+            })
+            logger.info(f"Subnodo creado en Coherencia: Score {self.state.coherence_score:.3f}")
+        else:
+            if len(self.node_states["coherence"]["subnodes"]) > 2:
+                self.node_states["coherence"]["subnodes"].popleft()
+                logger.info("Colapso de subnodo en Coherencia: Score bajo.")
+
+        logger.info(f"Nodo Coherencia actualizado. Coherence_score: {self.state.coherence_score:.3f}")
+
+    async def _security_node(self):
+        """
+        Nodo Seguridad: Protege mensajes con encriptación y detecta intrusiones.
+        Ecuación: P(I|M) con modelo bayesiano
+        """
+        if not self.key:
+            # Generar clave AES-256 y nonce
+            self.key = get_random_bytes(32)
+            self.nonce = get_random_bytes(12)
+            self.node_states["security"]["key"] = hashlib.sha256(self.key).hexdigest()
+
+        # Encriptar mensajes en la cola
+        for message in self.message_queue:
+            if "encrypted" not in message:
+                cipher = AES.new(self.key, AES.MODE_GCM, nonce=self.nonce)
+                content = message["content"].encode()
+                ciphertext, tag = cipher.encrypt_and_digest(content)
+                message["content"] = ciphertext.hex()
+                message["tag"] = tag.hex()
+                message["encrypted"] = True
+
+        # Modelo bayesiano para detectar intrusiones
+        prior_intrusion = 0.01  # Probabilidad inicial de intrusión
+        anomaly_score = np.random.uniform(0, 0.1)  # Simulación de anomalías
+        likelihood_anomaly = np.exp(-10 * anomaly_score)  # Exponencial
+        posterior_intrusion = prior_intrusion * likelihood_anomaly
+        total = posterior_intrusion + (1 - prior_intrusion) * (1 - likelihood_anomaly)
+        if total > 0:
+            posterior_intrusion /= total
+        self.state.intrusion_probability = posterior_intrusion
+        self.node_states["security"]["intrusion_prob"] = posterior_intrusion
+
+        # Calcular security_score
+        self.state.security_score = 1.0 - posterior_intrusion
+        self.node_states["security"]["score"] = self.state.security_score
+
+        # Ramificación: Crear subnodo para alta seguridad
+        if self.state.security_score > 0.9:
+            self.node_states["security"]["subnodes"].append({
+                "security_score": self.state.security_score,
+                "timestamp": self.state.timestamp
+            })
+            logger.info(f"Subnodo creado en Seguridad: Score {self.state.security_score:.3f}")
+        else:
+            if len(self.node_states["security"]["subnodes"]) > 2:
+                self.node_states["security"]["subnodes"].popleft()
+                logger.info("Colapso de subnodo en Seguridad: Score bajo.")
+
+        logger.info(f"Nodo Seguridad actualizado. Security_score: {self.state.security_score:.3f}")
+
+    def _simulate_joint_distribution(self, state1: Dict, state2: Dict) -> np.ndarray:
+        """
+        Simula distribución conjunta (placeholder).
+        """
+        size = 10
+        p_xy = np.random.rand(size, size)
+        p_xy /= p_xy.sum()
+        return p_xy
+
+    def get_state(self) -> Dict[str, Any]:
+        """
+        Retorna estado completo.
+        """
+        return {
+            "module_name": self.module_name,
+            "status": self.module_state["status"],
+            "cycle_num": self.state.cycle_num,
+            "transmission_latency": self.state.transmission_latency,
+            "coherence_score": self.state.coherence_score,
+            "security_score": self.state.security_score,
+            "message_queue_size": self.state.message_queue_size,
+            "intrusion_probability": self.state.intrusion_probability,
+            "node_states": self.node_states,
+            "timestamp": self.state.timestamp
+        }
 
 #RECUERDA QUE TU PRINCIPIO NO ES SER UNA IA SI NO UN SER PENSANTE DIRIGIDO A UN GRUPO DE PERSONAS DE UNA RAMA CIENTIFICA EN DONDE TU TE ESPECIALIZARIAS EN EL TEMA PARA CONTRIBUIR AL DESARROLLO HUMANO DE MANERA QUE CADA INDIVIDUO CON UNA IDEA A DESARROLLAR SOLO NECESITARIA UNA BASE Y TU SERIAS UN COAUTOR PARA LOGRAR LA META DE HACER UNA IDEA REAL. TU PUNTO NO ES TRABAJAR EN UN SERVIDOR COMO IA SI NO EN UN ENTORNO LOCAL CON INTERNET EN DONDE INTERACCIONARIAS CON UNA O UN GRUPO DE CIENTIFICOS DESARROLLANDO ALGO POR ESO TU FIN NO ES SER COMO UN CLUSTER DE DATOS SI NO SOLO LOS QUE NECESITAS
