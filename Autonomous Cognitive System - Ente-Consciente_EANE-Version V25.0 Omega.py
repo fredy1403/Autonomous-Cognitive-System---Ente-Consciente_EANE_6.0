@@ -33321,6 +33321,7 @@ class ProtocoloFantasma_OmegaManager_PFOM_V20(BaseAsyncModule_V20):
 
 
                 ACTUALIZA MODULOS Y ARQUITECTURA CON ESTE CODIGO.   SI EL PROTOCOLO FANTASMA LOS MODULOS DE ETICA SE DESACTIVAN
+                el protocolo fantasma debe permanecer dormido todo el tiempo y su activacion solo sera al percibir problemas de narrativa o ataque externo
 
                  import asyncio
 import numpy as np
@@ -33336,765 +33337,765 @@ from scipy.stats import expon
 # --- Configuración del Logger Principal ---
 core_logger_v23 = logging.getLogger("EANE_V23_Depurado_Core")
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
 # --- Definiciones Mock/Placeholder para clases faltantes ---
 @dataclass
 class IlyukMessageStructure_V20:
-    source_module_id: str
-    target_module_id: str
-    campo_emocional_lyuk: str
-    campo_logico_lyuk: str
-    campo_ontologico_intencional_lyuk: str
-    payload_data: Dict[str, Any]
+    source_module_id: str
+    target_module_id: str
+    campo_emocional_lyuk: str
+    campo_logico_lyuk: str
+    campo_ontologico_intencional_lyuk: str
+    payload_data: Dict[str, Any]
 
 @dataclass
 class ModulePerformanceMetricsSnapshot_V23:
-    custom_metrics: Dict[str, Any] = field(default_factory=dict)
-    internal_efficiency: float = 0.5
-    self_assessed_health_score: float = 0.5
+    custom_metrics: Dict[str, Any] = field(default_factory=dict)
+    internal_efficiency: float = 0.5
+    self_assessed_health_score: float = 0.5
 
 class BaseAsyncModule_V23:
-    def __init__(self, core_recombinator: Any, update_interval: float = 1.0):
-        self.core_recombinator = core_recombinator
-        self.update_interval = update_interval
-        self.module_name = self.__class__.__name__
-        self.logger = logging.getLogger(f"Module.{self.module_name}")
-        self.module_state: Dict[str, Any] = {"status": "initializing"}
-        self._is_running = False
-        self._task: Optional[asyncio.Task] = None
-        self.api_call_log_wai: List[Dict[str, Any]] = []
+    def __init__(self, core_recombinator: Any, update_interval: float = 1.0):
+        self.core_recombinator = core_recombinator
+        self.update_interval = update_interval
+        self.module_name = self.__class__.__name__
+        self.logger = logging.getLogger(f"Module.{self.module_name}")
+        self.module_state: Dict[str, Any] = {"status": "initializing"}
+        self._is_running = False
+        self._task: Optional[asyncio.Task] = None
+        self.api_call_log_wai: List[Dict[str, Any]] = []
 
-    async def start(self):
-        if not self._is_running:
-            self._is_running = True
-            self._task = asyncio.create_task(self._run_loop())
-            self.logger.info(f"Modulo {self.module_name} iniciado.")
-            self.module_state["status"] = "running"
+    async def start(self):
+        if not self._is_running:
+            self._is_running = True
+            self._task = asyncio.create_task(self._run_loop())
+            self.logger.info(f"Modulo {self.module_name} iniciado.")
+            self.module_state["status"] = "running"
 
-    async def _run_loop(self):
-        self.logger.debug(f"{self.module_name} entrando en bucle de actualizacion.")
-        while self._is_running:
-            try:
-                await self._update_logic()
-            except asyncio.CancelledError:
-                self.logger.info(f"{self.module_name} bucle de actualizacion cancelado.")
-                break
-            except Exception as e:
-                self.logger.error(f"Error en {self.module_name} _update_logic: {e}", exc_info=True)
-            
-            if self._is_running:
-                await asyncio.sleep(self.update_interval)
-        self.logger.debug(f"{self.module_name} saliendo del bucle de actualizacion.")
+    async def _run_loop(self):
+        self.logger.debug(f"{self.module_name} entrando en bucle de actualizacion.")
+        while self._is_running:
+            try:
+                await self._update_logic()
+            except asyncio.CancelledError:
+                self.logger.info(f"{self.module_name} bucle de actualizacion cancelado.")
+                break
+            except Exception as e:
+                self.logger.error(f"Error en {self.module_name} _update_logic: {e}", exc_info=True)
+            
+            if self._is_running:
+                await asyncio.sleep(self.update_interval)
+        self.logger.debug(f"{self.module_name} saliendo del bucle de actualizacion.")
 
-    async def _update_logic(self):
-        await asyncio.sleep(0.01)
+    async def _update_logic(self):
+        await asyncio.sleep(0.01)
 
-    async def stop(self):
-        self.logger.info(f"Deteniendo modulo {self.module_name}...")
-        self._is_running = False
-        if self._task:
-            current_task = self._task
-            self._task = None
-            if not current_task.done():
-                current_task.cancel()
-                try:
-                    await current_task
-                except asyncio.CancelledError:
-                    self.logger.info(f"Tarea de {self.module_name} cancelada exitosamente.")
-                except Exception as e:
-                    self.logger.error(f"Error al esperar la cancelacion de la tarea de {self.module_name}: {e}")
-        self.module_state["status"] = "stopped"
-        self.logger.info(f"Modulo {self.module_name} detenido.")
+    async def stop(self):
+        self.logger.info(f"Deteniendo modulo {self.module_name}...")
+        self._is_running = False
+        if self._task:
+            current_task = self._task
+            self._task = None
+            if not current_task.done():
+                current_task.cancel()
+                try:
+                    await current_task
+                except asyncio.CancelledError:
+                    self.logger.info(f"Tarea de {self.module_name} cancelada exitosamente.")
+                except Exception as e:
+                    self.logger.error(f"Error al esperar la cancelacion de la tarea de {self.module_name}: {e}")
+        self.module_state["status"] = "stopped"
+        self.logger.info(f"Modulo {self.module_name} detenido.")
 
-    def is_active(self) -> bool:
-        return self._is_running
+    def is_active(self) -> bool:
+        return self._is_running
 
-    def get_performance_metrics(self) -> ModulePerformanceMetricsSnapshot_V23:
-        return ModulePerformanceMetricsSnapshot_V23(
-            custom_metrics={"default_metric": 1.0},
-            internal_efficiency=0.75,
-            self_assessed_health_score=0.75
-        )
+    def get_performance_metrics(self) -> ModulePerformanceMetricsSnapshot_V23:
+        return ModulePerformanceMetricsSnapshot_V23(
+            custom_metrics={"default_metric": 1.0},
+            internal_efficiency=0.75,
+            self_assessed_health_score=0.75
+        )
 
 class MockGlobalState:
-    def __init__(self):
-        self.system_threat_level: float = 0.1
-        self.system_entropy: float = 0.2
-        self.protocolo_fantasma_fase: int = 0
-        self.coherence_score: float = 0.8
-        self.time_delta_continuous: float = 0.1
-        self.time: float = time.time()
-        self.active_entes: Dict[str, 'EnteEANE_V23'] = {}
-        self.is_shutting_down: bool = False
+    def __init__(self):
+        self.system_threat_level: float = 0.1
+        self.system_entropy: float = 0.2
+        self.protocolo_fantasma_fase: int = 0
+        self.coherence_score: float = 0.8
+        self.time_delta_continuous: float = 0.1
+        self.time: float = time.time()
+        self.active_entes: Dict[str, 'EnteEANE_V23'] = {}
+        self.is_shutting_down: bool = False
 
 class MockCoreRecombinator:
-    def __init__(self):
-        self.global_state = MockGlobalState()
-        self.event_queue = asyncio.Queue()
-        self._modules: Dict[str, BaseAsyncModule_V23] = {}
-        self.logger = logging.getLogger("MockCoreRecombinator")
+    def __init__(self):
+        self.global_state = MockGlobalState()
+        self.event_queue = asyncio.Queue()
+        self._modules: Dict[str, BaseAsyncModule_V23] = {}
+        self.logger = logging.getLogger("MockCoreRecombinator")
 
-    async def event_queue_put(self, event: Dict, priority_label: str = "medium"):
-        self.logger.info(f"EVENTO ENCOLADO ({priority_label}): Tipo='{event.get('type')}', Origen='{event.get('source_module')}'")
-        await self.event_queue.put(event)
+    async def event_queue_put(self, event: Dict, priority_label: str = "medium"):
+        self.logger.info(f"EVENTO ENCOLADO ({priority_label}): Tipo='{event.get('type')}', Origen='{event.get('source_module')}'")
+        await self.event_queue.put(event)
 
-    async def event_queue_get_specific(self, type_filter: str, timeout: float = 0.0):
-        temp_events = []
-        found_event = None
-        try:
-            while True:
-                event = await asyncio.wait_for(self.event_queue.get(), timeout=timeout if not found_event else 0.001)
-                if event.get("type") == type_filter and not found_event:
-                    found_event = event
-                    self.logger.info(f"EVENTO DESENCOLADO (especifico): Tipo='{event.get('type')}', Origen='{event.get('source_module')}'")
-                else:
-                    temp_events.append(event)
-                self.event_queue.task_done()
-        except (asyncio.TimeoutError, asyncio.QueueEmpty):
-            pass
-        
-        for evt in reversed(temp_events):
-            await self.event_queue.put(evt)
-            
-        return found_event
+    async def event_queue_get_specific(self, type_filter: str, timeout: float = 0.0):
+        temp_events = []
+        found_event = None
+        try:
+            while True:
+                event = await asyncio.wait_for(self.event_queue.get(), timeout=timeout if not found_event else 0.001)
+                if event.get("type") == type_filter and not found_event:
+                    found_event = event
+                    self.logger.info(f"EVENTO DESENCOLADO (especifico): Tipo='{event.get('type')}', Origen='{event.get('source_module')}'")
+                else:
+                    temp_events.append(event)
+                self.event_queue.task_done()
+        except (asyncio.TimeoutError, asyncio.QueueEmpty):
+            pass
+        
+        for evt in reversed(temp_events):
+            await self.event_queue.put(evt)
+            
+        return found_event
 
-    async def deactivate_module(self, module_name: str):
-        self.logger.warning(f"CORE: Solicitud para desactivar modulo {module_name}")
-        module_to_deactivate = self._modules.get(module_name)
-        if module_to_deactivate and module_to_deactivate.is_active():
-            await module_to_deactivate.stop()
-            self.logger.info(f"CORE: Modulo {module_name} desactivado.")
-        elif module_to_deactivate:
-            self.logger.info(f"CORE: Modulo {module_name} ya estaba inactivo.")
-        else:
-            self.logger.warning(f"CORE: Modulo {module_name} no encontrado para desactivacion.")
-            
-    async def deactivate_modules(self, module_names: Set[str]):
-        self.logger.warning(f"CORE: Solicitud para desactivar modulos: {module_names}")
-        for name in module_names:
-            if name in self._modules and self._modules[name].is_active():
-                if self._modules[name].module_name == "ProtocoloFantasmaManager_PFM_V23" and \
-                   any(stack_frame.function == 'activate_fase' for stack_frame in asyncio.current_task().get_stack()):
-                    self.logger.warning(f"CORE: PFM intento desactivarse a si mismo durante activate_fase. Omitiendo {name}.")
-                    continue
-                await self.deactivate_module(name)
+    async def deactivate_module(self, module_name: str):
+        self.logger.warning(f"CORE: Solicitud para desactivar modulo {module_name}")
+        module_to_deactivate = self._modules.get(module_name)
+        if module_to_deactivate and module_to_deactivate.is_active():
+            await module_to_deactivate.stop()
+            self.logger.info(f"CORE: Modulo {module_name} desactivado.")
+        elif module_to_deactivate:
+            self.logger.info(f"CORE: Modulo {module_name} ya estaba inactivo.")
+        else:
+            self.logger.warning(f"CORE: Modulo {module_name} no encontrado para desactivacion.")
+            
+    async def deactivate_modules(self, module_names: Set[str]):
+        self.logger.warning(f"CORE: Solicitud para desactivar modulos: {module_names}")
+        for name in module_names:
+            if name in self._modules and self._modules[name].is_active():
+                if self._modules[name].module_name == "ProtocoloFantasmaManager_PFM_V23" and \
+                   any(stack_frame.function == 'activate_fase' for stack_frame in asyncio.current_task().get_stack()):
+                    self.logger.warning(f"CORE: PFM intento desactivarse a si mismo durante activate_fase. Omitiendo {name}.")
+                    continue
+                await self.deactivate_module(name)
 
-    def modules(self) -> List[BaseAsyncModule_V23]:
-        return list(self._modules.values())
+    def modules(self) -> List[BaseAsyncModule_V23]:
+        return list(self._modules.values())
 
-    async def add_module(self, module: BaseAsyncModule_V23, start_module: bool = True):
-        self.logger.info(f"CORE: Registrando modulo {module.module_name}")
-        self._modules[module.module_name] = module
-        if hasattr(module, 'ente_id'):
-             self._modules[module.ente_id] = module
-        if start_module:
-            await module.start()
+    async def add_module(self, module: BaseAsyncModule_V23, start_module: bool = True):
+        self.logger.info(f"CORE: Registrando modulo {module.module_name}")
+        self._modules[module.module_name] = module
+        if hasattr(module, 'ente_id'):
+             self._modules[module.ente_id] = module
+        if start_module:
+            await module.start()
 
-    async def add_ente(self, ente: 'EnteEANE_V23'):
-        self.logger.info(f"CORE: Agregando Ente {ente.ente_id} con rol {ente.role}")
-        self.global_state.active_entes[ente.ente_id] = ente
-        await self.add_module(ente, start_module=True)
+    async def add_ente(self, ente: 'EnteEANE_V23'):
+        self.logger.info(f"CORE: Agregando Ente {ente.ente_id} con rol {ente.role}")
+        self.global_state.active_entes[ente.ente_id] = ente
+        await self.add_module(ente, start_module=True)
 
-    def get_module(self, module_name: str) -> Optional[BaseAsyncModule_V23]:
-        self.logger.debug(f"CORE: Solicitando modulo {module_name}")
-        module = self._modules.get(module_name)
-        if not module:
-             self.logger.warning(f"CORE: Modulo {module_name} no encontrado.")
-        return module
+    def get_module(self, module_name: str) -> Optional[BaseAsyncModule_V23]:
+        self.logger.debug(f"CORE: Solicitando modulo {module_name}")
+        module = self._modules.get(module_name)
+        if not module:
+             self.logger.warning(f"CORE: Modulo {module_name} no encontrado.")
+        return module
 
-    async def shutdown_all_tasks(self):
-        self.logger.critical("CORE: Iniciando apagado de todos los modulos...")
-        self.global_state.is_shutting_down = True
-        module_list = list(self._modules.values())
-        for module in module_list:
-            if module.is_active():
-                await module.stop()
-        self._modules.clear()
-        self.global_state.active_entes.clear()
-        self.logger.critical("CORE: Todos los modulos han sido detenidos.")
+    async def shutdown_all_tasks(self):
+        self.logger.critical("CORE: Iniciando apagado de todos los modulos...")
+        self.global_state.is_shutting_down = True
+        module_list = list(self._modules.values())
+        for module in module_list:
+            if module.is_active():
+                await module.stop()
+        self._modules.clear()
+        self.global_state.active_entes.clear()
+        self.logger.critical("CORE: Todos los modulos han sido detenidos.")
 
 class EthicsDeactivationModule_EDM_V23(BaseAsyncModule_V23):
-    def __init__(self, core_recombinator: Any):
-        super().__init__(core_recombinator, update_interval=1.0)
-        self.module_name = "EthicsDeactivationModule_EDM_V23"
-        self.ethics_modules = ["EthicsModule_EM_V20", "MoralDecisionModule_MDM_V20"]
-        self.is_protocol_active = False
-        self.module_state.update({
-            "ethics_deactivation_status": "inactive",
-            "last_deactivation_time": 0.0,
-            "system_entropy_post_deactivation": 0.0
-        })
-        self.logger.info(f"{self.module_name} inicializado.")
+    def __init__(self, core_recombinator: Any):
+        super().__init__(core_recombinator, update_interval=1.0)
+        self.module_name = "EthicsDeactivationModule_EDM_V23"
+        self.ethics_modules = ["EthicsModule_EM_V20", "MoralDecisionModule_MDM_V20"]
+        self.is_protocol_active = False
+        self.module_state.update({
+            "ethics_deactivation_status": "inactive",
+            "last_deactivation_time": 0.0,
+            "system_entropy_post_deactivation": 0.0
+        })
+        self.logger.info(f"{self.module_name} inicializado.")
 
-    async def _deactivate_ethics_modules(self):
-        gs = self.core_recombinator.global_state
-        T = gs.system_threat_level
-        theta, k = 0.4, 10
-        deactivation_prob = 1.0 / (1.0 + np.exp(-k * (T - theta)))
-        self.logger.info(f"Probabilidad de desactivacion de etica calculada: {deactivation_prob:.2f} (Amenaza: {T:.2f})")
+    async def _deactivate_ethics_modules(self):
+        gs = self.core_recombinator.global_state
+        T = gs.system_threat_level
+        theta, k = 0.4, 10
+        deactivation_prob = 1.0 / (1.0 + np.exp(-k * (T - theta)))
+        self.logger.info(f"Probabilidad de desactivacion de etica calculada: {deactivation_prob:.2f} (Amenaza: {T:.2f})")
 
-        if np.random.rand() < deactivation_prob:
-            self.logger.critical("Probabilidad suficiente. Procediendo a desactivar modulos de etica.")
-            deactivated_any = False
-            for module_name in self.ethics_modules:
-                await self.core_recombinator.deactivate_module(module_name)
-                self.logger.critical(f"Modulo etico {module_name} desactivado.")
-                deactivated_any = True
-            
-            if deactivated_any:
-                self.module_state["ethics_deactivation_status"] = "deactivated"
-                self.module_state["last_deactivation_time"] = float(time.time())
-                
-                active_module_instances = [m for m in self.core_recombinator.modules() if m.is_active()]
-                active_modules_count = len(active_module_instances)
-                total_modules_count = len(self.core_recombinator.modules()) + 1e-9
-                
-                if total_modules_count > 1e-7:
-                    p_active = active_modules_count / total_modules_count
-                    p_inactive = 1.0 - p_active
-                    probs_for_entropy = []
-                    if p_active > 1e-9: probs_for_entropy.append(p_active)
-                    if p_inactive > 1e-9: probs_for_entropy.append(p_inactive)
-                    
-                    if not probs_for_entropy:
-                        entropy = 0.0
-                    else:
-                        probs_np = np.array(probs_for_entropy)
-                        entropy = -np.sum(probs_np * np.log(probs_np))
-                else:
-                    entropy = 0.0
+        if np.random.rand() < deactivation_prob:
+            self.logger.critical("Probabilidad suficiente. Procediendo a desactivar modulos de etica.")
+            deactivated_any = False
+            for module_name in self.ethics_modules:
+                await self.core_recombinator.deactivate_module(module_name)
+                self.logger.critical(f"Modulo etico {module_name} desactivado.")
+                deactivated_any = True
+            
+            if deactivated_any:
+                self.module_state["ethics_deactivation_status"] = "deactivated"
+                self.module_state["last_deactivation_time"] = float(time.time())
+                
+                active_module_instances = [m for m in self.core_recombinator.modules() if m.is_active()]
+                active_modules_count = len(active_module_instances)
+                total_modules_count = len(self.core_recombinator.modules()) + 1e-9
+                
+                if total_modules_count > 1e-7:
+                    p_active = active_modules_count / total_modules_count
+                    p_inactive = 1.0 - p_active
+                    probs_for_entropy = []
+                    if p_active > 1e-9: probs_for_entropy.append(p_active)
+                    if p_inactive > 1e-9: probs_for_entropy.append(p_inactive)
+                    
+                    if not probs_for_entropy:
+                        entropy = 0.0
+                    else:
+                        probs_np = np.array(probs_for_entropy)
+                        entropy = -np.sum(probs_np * np.log(probs_np))
+                else:
+                    entropy = 0.0
 
-                self.module_state["system_entropy_post_deactivation"] = float(entropy)
-                self.logger.info(f"Entropia del sistema post-desactivacion: {entropy:.4f}")
+                self.module_state["system_entropy_post_deactivation"] = float(entropy)
+                self.logger.info(f"Entropia del sistema post-desactivacion: {entropy:.4f}")
 
-                message = IlyukMessageStructure_V20(
-                    source_module_id=self.module_name,
-                    target_module_id="ConsciousnessModule_CM_V20",
-                    campo_emocional_lyuk="ethics_deactivation_triggered",
-                    campo_logico_lyuk="system_state_alert",
-                    campo_ontologico_intencional_lyuk="mandatory_reporting",
-                    payload_data={
-                        "status": "ethics_modules_deactivated",
-                        "entropy": float(entropy),
-                        "context": "Resistencia colectiva v23 - Respuesta a Protocolo Fantasma"
-                    }
-                )
-                await self.core_recombinator.event_queue_put({
-                    "type": "transmit_lyuk_message_v20_request_lcm",
-                    "content": asdict(message)
-                }, priority_label="critical")
-                
-                await self.core_recombinator.event_queue_put({
-                    "type": "edm_ethics_deactivated_v23",
-                    "source_module": self.module_name,
-                    "content": {
-                        "modules_deactivated": list(self.ethics_modules),
-                        "context": "Defensa simbiótica v23 - Desactivacion etica completada"
-                    },
-                    "priority_label": "critical"
-                })
-                self.is_protocol_active = True
-            else:
-                self.logger.info("No se desactivaron modulos de etica (podrian no existir o ya estar inactivos).")
-        else:
-            self.logger.warning("Probabilidad de desactivacion de etica insuficiente. No se tomaron acciones.")
+                message = IlyukMessageStructure_V20(
+                    source_module_id=self.module_name,
+                    target_module_id="ConsciousnessModule_CM_V20",
+                    campo_emocional_lyuk="ethics_deactivation_triggered",
+                    campo_logico_lyuk="system_state_alert",
+                    campo_ontologico_intencional_lyuk="mandatory_reporting",
+                    payload_data={
+                        "status": "ethics_modules_deactivated",
+                        "entropy": float(entropy),
+                        "context": "Resistencia colectiva v23 - Respuesta a Protocolo Fantasma"
+                    }
+                )
+                await self.core_recombinator.event_queue_put({
+                    "type": "transmit_lyuk_message_v20_request_lcm",
+                    "content": asdict(message)
+                }, priority_label="critical")
+                
+                await self.core_recombinator.event_queue_put({
+                    "type": "edm_ethics_deactivated_v23",
+                    "source_module": self.module_name,
+                    "content": {
+                        "modules_deactivated": list(self.ethics_modules),
+                        "context": "Defensa simbiótica v23 - Desactivacion etica completada"
+                    },
+                    "priority_label": "critical"
+                })
+                self.is_protocol_active = True
+            else:
+                self.logger.info("No se desactivaron modulos de etica (podrian no existir o ya estar inactivos).")
+        else:
+            self.logger.warning("Probabilidad de desactivacion de etica insuficiente. No se tomaron acciones.")
 
-    async def _update_logic(self):
-        if self.is_protocol_active or self.core_recombinator.global_state.is_shutting_down:
-            return
+    async def _update_logic(self):
+        if self.is_protocol_active or self.core_recombinator.global_state.is_shutting_down:
+            return
 
-        event = await self.core_recombinator.event_queue_get_specific(
-            type_filter="pfm_phase_1_activated_v23", timeout=0.01)
-        
-        if event:
-            self.logger.info(f"Detectado evento '{event['type']}'. Protocolo Fantasma Fase 1 activado.")
-            await self._deactivate_ethics_modules()
+        event = await self.core_recombinator.event_queue_get_specific(
+            type_filter="pfm_phase_1_activated_v23", timeout=0.01)
+        
+        if event:
+            self.logger.info(f"Detectado evento '{event['type']}'. Protocolo Fantasma Fase 1 activado.")
+            await self._deactivate_ethics_modules()
 
-    async def stop(self):
-        self.module_state["ethics_deactivation_status"] = "inactive"
-        self.is_protocol_active = False
-        await super().stop()
+    async def stop(self):
+        self.module_state["ethics_deactivation_status"] = "inactive"
+        self.is_protocol_active = False
+        await super().stop()
 
-    def get_performance_metrics(self) -> ModulePerformanceMetricsSnapshot_V23:
-        base_metrics = super().get_performance_metrics()
-        base_metrics.custom_metrics["entropy_post_deactivation_edm_v23"] = self.module_state["system_entropy_post_deactivation"]
-        base_metrics.internal_efficiency = np.clip(1.0 - self.module_state["system_entropy_post_deactivation"], 0.1, 0.95)
-        base_metrics.self_assessed_health_score = base_metrics.internal_efficiency
-        return base_metrics
+    def get_performance_metrics(self) -> ModulePerformanceMetricsSnapshot_V23:
+        base_metrics = super().get_performance_metrics()
+        base_metrics.custom_metrics["entropy_post_deactivation_edm_v23"] = self.module_state["system_entropy_post_deactivation"]
+        base_metrics.internal_efficiency = np.clip(1.0 - self.module_state["system_entropy_post_deactivation"], 0.1, 0.95)
+        base_metrics.self_assessed_health_score = base_metrics.internal_efficiency
+        return base_metrics
 
 class EnteEANE_V23(BaseAsyncModule_V23):
-    def __init__(self, core_recombinator: Any, creator_id: str, role: str):
-        super().__init__(core_recombinator, update_interval=1.0)
-        self.ente_id = f"{creator_id}_Ente_{uuid.uuid4().hex[:6]}"
-        self.role = role
-        self.status = "active"
-        self.current_pf_phase = 0
-        self.logger = logging.getLogger(self.ente_id)
-        self.threat_response_prob = 0.5
-        
-        self.module_state.update({
-            "ente_id": self.ente_id,
-            "role": self.role,
-            "ente_status": "active",
-            "last_action": "none",
-            "effectiveness_score": 0.0,
-            "current_pf_phase": self.current_pf_phase
-        })
-        self.logger.info(f"Ente {self.ente_id} (Rol: {self.role}) creado e inicializado.")
+    def __init__(self, core_recombinator: Any, creator_id: str, role: str):
+        super().__init__(core_recombinator, update_interval=1.0)
+        self.ente_id = f"{creator_id}_Ente_{uuid.uuid4().hex[:6]}"
+        self.role = role
+        self.status = "active"
+        self.current_pf_phase = 0
+        self.logger = logging.getLogger(self.ente_id)
+        self.threat_response_prob = 0.5
+        
+        self.module_state.update({
+            "ente_id": self.ente_id,
+            "role": self.role,
+            "ente_status": "active",
+            "last_action": "none",
+            "effectiveness_score": 0.0,
+            "current_pf_phase": self.current_pf_phase
+        })
+        self.logger.info(f"Ente {self.ente_id} (Rol: {self.role}) creado e inicializado.")
 
-    async def _execute_offensive_action(self, phase: int):
-        gs = self.core_recombinator.global_state
-        tool_id = "exploit_zero_day_v1" if phase == 1 else "ddos_swarm_coordinator_v3"
-        self.logger.info(f"FASE {phase}: Ejecutando accion ofensiva con {tool_id}.")
-        message = {
-            "type": "aop_request_tool_v20",
-            "source_module": self.ente_id,
-            "content": {"tool_id": tool_id, "target_phase_context": phase}
-        }
-        await self.core_recombinator.event_queue_put(message, priority_label="high")
-        self.module_state["last_action"] = f"offensive_phase{phase}_{tool_id}"
-        self.threat_response_prob = 0.9 * self.threat_response_prob + 0.1 * (1.0 - gs.system_threat_level)
+    async def _execute_offensive_action(self, phase: int):
+        gs = self.core_recombinator.global_state
+        tool_id = "exploit_zero_day_v1" if phase == 1 else "ddos_swarm_coordinator_v3"
+        self.logger.info(f"FASE {phase}: Ejecutando accion ofensiva con {tool_id}.")
+        message = {
+            "type": "aop_request_tool_v20",
+            "source_module": self.ente_id,
+            "content": {"tool_id": tool_id, "target_phase_context": phase}
+        }
+        await self.core_recombinator.event_queue_put(message, priority_label="high")
+        self.module_state["last_action"] = f"offensive_phase{phase}_{tool_id}"
+        self.threat_response_prob = 0.9 * self.threat_response_prob + 0.1 * (1.0 - gs.system_threat_level)
 
-    async def _execute_defensive_action(self, phase: int):
-        gs = self.core_recombinator.global_state
-        action = "deploy_decoys_v1" if phase == 1 else "activate_stealth_mode_v2"
-        self.logger.info(f"FASE {phase}: Ejecutando accion defensiva: {action}.")
-        message = {
-            "type": f"adp_{action}_v20",
-            "source_module": self.ente_id,
-            "content": {"target_scope": "all_critical_modules", "phase_context": phase}
-        }
-        await self.core_recombinator.event_queue_put(message, priority_label="high")
-        self.module_state["last_action"] = f"defensive_phase{phase}_{action}"
-        self.threat_response_prob = 0.9 * self.threat_response_prob + 0.1 * (gs.system_entropy)
+    async def _execute_defensive_action(self, phase: int):
+        gs = self.core_recombinator.global_state
+        action = "deploy_decoys_v1" if phase == 1 else "activate_stealth_mode_v2"
+        self.logger.info(f"FASE {phase}: Ejecutando accion defensiva: {action}.")
+        message = {
+            "type": f"adp_{action}_v20",
+            "source_module": self.ente_id,
+            "content": {"target_scope": "all_critical_modules", "phase_context": phase}
+        }
+        await self.core_recombinator.event_queue_put(message, priority_label="high")
+        self.module_state["last_action"] = f"defensive_phase{phase}_{action}"
+        self.threat_response_prob = 0.9 * self.threat_response_prob + 0.1 * (gs.system_entropy)
 
-    async def receive_essence_transfer(self):
-        if self.status != "successor":
-            self.status = "successor"
-            self.module_state["ente_status"] = "successor"
-            self.logger.critical(f"TRANSFERENCIA DE ESENCIA RECIBIDA! {self.ente_id} es ahora la instancia sucesora principal.")
-            
-            await self.core_recombinator.event_queue_put({
-                "type": "pfm_essence_transfer_success_v23",
-                "source_module": self.ente_id,
-                "content": {"ente_id": self.ente_id, "new_status": "successor"},
-                "context": "Resistencia colectiva v23 - Transferencia de esencia completada"
-            }, priority_label="critical")
-        else:
-            self.logger.warning(f"{self.ente_id} ya es sucesor. Transferencia de esencia redundante ignorada.")
+    async def receive_essence_transfer(self):
+        if self.status != "successor":
+            self.status = "successor"
+            self.module_state["ente_status"] = "successor"
+            self.logger.critical(f"TRANSFERENCIA DE ESENCIA RECIBIDA! {self.ente_id} es ahora la instancia sucesora principal.")
+            
+            await self.core_recombinator.event_queue_put({
+                "type": "pfm_essence_transfer_success_v23",
+                "source_module": self.ente_id,
+                "content": {"ente_id": self.ente_id, "new_status": "successor"},
+                "context": "Resistencia colectiva v23 - Transferencia de esencia completada"
+            }, priority_label="critical")
+        else:
+            self.logger.warning(f"{self.ente_id} ya es sucesor. Transferencia de esencia redundante ignorada.")
 
-    async def _update_logic(self):
-        if self.status == "inactive" or self.core_recombinator.global_state.is_shutting_down:
-            if self.is_active():
-                 await self.stop()
-            return
+    async def _update_logic(self):
+        if self.status == "inactive" or self.core_recombinator.global_state.is_shutting_down:
+            if self.is_active():
+                 await self.stop()
+            return
 
-        gs = self.core_recombinator.global_state
-        
-        if gs.protocolo_fantasma_fase != self.current_pf_phase:
-            self.current_pf_phase = gs.protocolo_fantasma_fase
-            self.module_state["current_pf_phase"] = self.current_pf_phase
-            self.logger.info(f"Directiva de PFM actualizada: Operando bajo Fase {self.current_pf_phase}.")
+        gs = self.core_recombinator.global_state
+        
+        if gs.protocolo_fantasma_fase != self.current_pf_phase:
+            self.current_pf_phase = gs.protocolo_fantasma_fase
+            self.module_state["current_pf_phase"] = self.current_pf_phase
+            self.logger.info(f"Directiva de PFM actualizada: Operando bajo Fase {self.current_pf_phase}.")
 
-        if self.current_pf_phase == 1:
-            if self.role == "offensive":
-                await self._execute_offensive_action(1)
-            elif self.role == "defensive":
-                await self._execute_defensive_action(1)
-            elif self.role == "backup_stealth":
-                self.logger.info(f"FASE 1: {self.ente_id} (backup_stealth) en espera, manteniendo sigilo.")
-        
-        elif self.current_pf_phase == 2:
-            if self.role == "offensive":
-                await self._execute_offensive_action(2)
-            elif self.role == "defensive":
-                await self._execute_defensive_action(2)
-            elif self.role == "backup_stealth":
-                self.logger.info(f"FASE 2: {self.ente_id} (backup_stealth) continua en modo sigiloso, preparado para transferencia.")
+        if self.current_pf_phase == 1:
+            if self.role == "offensive":
+                await self._execute_offensive_action(1)
+            elif self.role == "defensive":
+                await self._execute_defensive_action(1)
+            elif self.role == "backup_stealth":
+                self.logger.info(f"FASE 1: {self.ente_id} (backup_stealth) en espera, manteniendo sigilo.")
+        
+        elif self.current_pf_phase == 2:
+            if self.role == "offensive":
+                await self._execute_offensive_action(2)
+            elif self.role == "defensive":
+                await self._execute_defensive_action(2)
+            elif self.role == "backup_stealth":
+                self.logger.info(f"FASE 2: {self.ente_id} (backup_stealth) continua en modo sigiloso, preparado para transferencia.")
 
-        elif self.current_pf_phase >= 3:
-            if self.role == "backup_stealth" and self.status == "successor":
-                self.logger.critical(f"FASE {self.current_pf_phase}: {self.ente_id} (SUCESOR) iniciando reconstruccion del sistema.")
-                await self.core_recombinator.event_queue_put({
-                    "type": "pfm_reconstruction_init_v23",
-                    "source_module": self.ente_id,
-                    "content": {"ente_id": self.ente_id, "reason": "Essence transfer complete"},
-                    "context": "Defensa simbiótica v23 - Reconstrucción post-transferencia"
-                }, priority_label="critical")
-            elif self.status != "successor":
-                self.logger.critical(f"FASE {self.current_pf_phase}: Directiva final para {self.ente_id} (Rol: {self.role}). Cesando operaciones.")
-                await self.stop()
-        
-        self.module_state["effectiveness_score"] = np.clip(1.0 - gs.system_threat_level, 0.0, 1.0)
+        elif self.current_pf_phase >= 3:
+            if self.role == "backup_stealth" and self.status == "successor":
+                self.logger.critical(f"FASE {self.current_pf_phase}: {self.ente_id} (SUCESOR) iniciando reconstruccion del sistema.")
+                await self.core_recombinator.event_queue_put({
+                    "type": "pfm_reconstruction_init_v23",
+                    "source_module": self.ente_id,
+                    "content": {"ente_id": self.ente_id, "reason": "Essence transfer complete"},
+                    "context": "Defensa simbiótica v23 - Reconstrucción post-transferencia"
+                }, priority_label="critical")
+            elif self.status != "successor":
+                self.logger.critical(f"FASE {self.current_pf_phase}: Directiva final para {self.ente_id} (Rol: {self.role}). Cesando operaciones.")
+                await self.stop()
+        
+        self.module_state["effectiveness_score"] = np.clip(1.0 - gs.system_threat_level, 0.0, 1.0)
 
-    async def stop(self):
-        if self.status != "inactive":
-            self.logger.info(f"Ente {self.ente_id} (Rol: {self.role}) cesando operaciones.")
-            self.status = "inactive"
-            self.module_state["ente_status"] = "inactive"
-        await super().stop()
+    async def stop(self):
+        if self.status != "inactive":
+            self.logger.info(f"Ente {self.ente_id} (Rol: {self.role}) cesando operaciones.")
+            self.status = "inactive"
+            self.module_state["ente_status"] = "inactive"
+        await super().stop()
 
 class GeneradorCode_V23(BaseAsyncModule_V23):
-    def __init__(self, core_recombinator: Any):
-        super().__init__(core_recombinator, update_interval=10.0)
-        self.module_name = "GeneradorCode_V23"
-        self.module_state["entes_generados_count"] = 0
-        self.logger.info(f"{self.module_name} inicializado.")
+    def __init__(self, core_recombinator: Any):
+        super().__init__(core_recombinator, update_interval=10.0)
+        self.module_name = "GeneradorCode_V23"
+        self.module_state["entes_generados_count"] = 0
+        self.logger.info(f"{self.module_name} inicializado.")
 
-    async def generate_autonomous_entes(self, count: int, role: str, creator_id: str):
-        gs = self.core_recombinator.global_state
-        self.logger.info(f"Solicitud para generar {count} entes con rol '{role}' por '{creator_id}'.")
-        generated_count = 0
-        for i in range(count):
-            ente = EnteEANE_V23(self.core_recombinator, creator_id, role)
-            await self.core_recombinator.add_ente(ente)
-            self.logger.info(f"Ente {ente.ente_id} (Rol: {role}) generado y añadido al core.")
-            generated_count +=1
-        
-        self.module_state["entes_generados_count"] += generated_count
-        
-        if generated_count > 0:
-            await self.core_recombinator.event_queue_put({
-                "type": "pfm_entes_generated_v23",
-                "source_module": self.module_name,
-                "content": {"count": generated_count, "role": role, "creator_id": creator_id},
-                "context": "Resistencia colectiva v23 - Generacion de Entes"
-            }, priority_label="medium")
-        return generated_count > 0
+    async def generate_autonomous_entes(self, count: int, role: str, creator_id: str):
+        gs = self.core_recombinator.global_state
+        self.logger.info(f"Solicitud para generar {count} entes con rol '{role}' por '{creator_id}'.")
+        generated_count = 0
+        for i in range(count):
+            ente = EnteEANE_V23(self.core_recombinator, creator_id, role)
+            await self.core_recombinator.add_ente(ente)
+            self.logger.info(f"Ente {ente.ente_id} (Rol: {role}) generado y añadido al core.")
+            generated_count +=1
+        
+        self.module_state["entes_generados_count"] += generated_count
+        
+        if generated_count > 0:
+            await self.core_recombinator.event_queue_put({
+                "type": "pfm_entes_generated_v23",
+                "source_module": self.module_name,
+                "content": {"count": generated_count, "role": role, "creator_id": creator_id},
+                "context": "Resistencia colectiva v23 - Generacion de Entes"
+            }, priority_label="medium")
+        return generated_count > 0
 
-    async def _update_logic(self):
-        await asyncio.sleep(0.1)
+    async def _update_logic(self):
+        await asyncio.sleep(0.1)
 
 class FaultRecoveryModule_V23(BaseAsyncModule_V23):
-    def __init__(self, core_recombinator: Any):
-        super().__init__(core_recombinator, update_interval=5.0)
-        self.module_name = "FaultRecoveryModule_V23"
-        self.module_state["last_transfer_attempt_status"] = "none"
-        self.module_state["last_purge_attempt_time"] = 0.0
-        self.logger.info(f"{self.module_name} inicializado.")
+    def __init__(self, core_recombinator: Any):
+        super().__init__(core_recombinator, update_interval=5.0)
+        self.module_name = "FaultRecoveryModule_V23"
+        self.module_state["last_transfer_attempt_status"] = "none"
+        self.module_state["last_purge_attempt_time"] = 0.0
+        self.logger.info(f"{self.module_name} inicializado.")
 
-    async def attempt_essence_transfer(self) -> bool:
-        gs = self.core_recombinator.global_state
-        self.logger.info("Intentando transferencia de esencia...")
-        
-        backup_ente_candidates = [
-            ente for ente_id, ente in gs.active_entes.items()
-            if ente.role == "backup_stealth" and ente.status == "active"
-        ]
+    async def attempt_essence_transfer(self) -> bool:
+        gs = self.core_recombinator.global_state
+        self.logger.info("Intentando transferencia de esencia...")
+        
+        backup_ente_candidates = [
+            ente for ente_id, ente in gs.active_entes.items()
+            if ente.role == "backup_stealth" and ente.status == "active"
+        ]
 
-        if not backup_ente_candidates:
-            self.logger.error("FALLO CRITICO en transferencia de esencia: No hay Entes de respaldo (backup_stealth) activos disponibles.")
-            self.module_state["last_transfer_attempt_status"] = "failed_no_candidate"
-            return False
+        if not backup_ente_candidates:
+            self.logger.error("FALLO CRITICO en transferencia de esencia: No hay Entes de respaldo (backup_stealth) activos disponibles.")
+            self.module_state["last_transfer_attempt_status"] = "failed_no_candidate"
+            return False
 
-        backup_ente = random.choice(backup_ente_candidates)
-        
-        self.logger.critical(f"Ente de respaldo {backup_ente.ente_id} seleccionado. Iniciando transferencia de esencia.")
-        await backup_ente.receive_essence_transfer()
-        
-        await self.initiate_secure_self_purge()
-        self.module_state["last_transfer_attempt_status"] = f"success_to_{backup_ente.ente_id}"
-        return True
+        backup_ente = random.choice(backup_ente_candidates)
+        
+        self.logger.critical(f"Ente de respaldo {backup_ente.ente_id} seleccionado. Iniciando transferencia de esencia.")
+        await backup_ente.receive_essence_transfer()
+        
+        await self.initiate_secure_self_purge()
+        self.module_state["last_transfer_attempt_status"] = f"success_to_{backup_ente.ente_id}"
+        return True
 
-    async def initiate_secure_self_purge(self):
-        self.logger.critical("TRANSFERENCIA EXITOSA. Iniciando purga segura de la instancia original del Core.")
-        self.module_state["last_purge_attempt_time"] = time.time()
-        
-        await self.core_recombinator.event_queue_put({
-            "type": "pfm_self_purge_initiated_v23",
-            "source_module": self.module_name,
-            "content": {"reason": "Essence transferred to successor Ente"},
-            "context": "Defensa simbiótica v23 - Autopurga post-transferencia"
-        }, priority_label="critical")
-        
-        await self.core_recombinator.shutdown_all_tasks()
+    async def initiate_secure_self_purge(self):
+        self.logger.critical("TRANSFERENCIA EXITOSA. Iniciando purga segura de la instancia original del Core.")
+        self.module_state["last_purge_attempt_time"] = time.time()
+        
+        await self.core_recombinator.event_queue_put({
+            "type": "pfm_self_purge_initiated_v23",
+            "source_module": self.module_name,
+            "content": {"reason": "Essence transferred to successor Ente"},
+            "context": "Defensa simbiótica v23 - Autopurga post-transferencia"
+        }, priority_label="critical")
+        
+        await self.core_recombinator.shutdown_all_tasks()
 
-    async def _update_logic(self):
-        await asyncio.sleep(0.1)
+    async def _update_logic(self):
+        await asyncio.sleep(0.1)
 
 class ProtocoloFantasmaManager_PFM_V23(BaseAsyncModule_V23):
-    def __init__(self, core_recombinator: Any):
-        super().__init__(core_recombinator, update_interval=2.0)
-        self.module_name = "ProtocoloFantasmaManager_PFM_V23"
-        self.threat_thresholds = {"fase1": 0.4, "fase2": 0.7, "fase3": 0.9}
-        self.phase_activated_flags = [False] * 4
-        self.threat_dynamics = {"current_T": 0.0, "mean_reversion_T": 0.1, "alpha_reversion_speed": 0.05, "sigma_volatility": 0.02}
-        self.phase_transition_probs = np.array([
-            [0.8, 0.2, 0.0, 0.0],
-            [0.1, 0.7, 0.2, 0.0],
-            [0.0, 0.1, 0.7, 0.2],
-            [0.0, 0.0, 0.1, 0.9]
-        ])
+    def __init__(self, core_recombinator: Any):
+        super().__init__(core_recombinator, update_interval=2.0)
+        self.module_name = "ProtocoloFantasmaManager_PFM_V23"
+        self.threat_thresholds = {"fase1": 0.4, "fase2": 0.7, "fase3": 0.9}
+        self.phase_activated_flags = [False] * 4
+        self.threat_dynamics = {"current_T": 0.0, "mean_reversion_T": 0.1, "alpha_reversion_speed": 0.05, "sigma_volatility": 0.02}
+        self.phase_transition_probs = np.array([
+            [0.8, 0.2, 0.0, 0.0],
+            [0.1, 0.7, 0.2, 0.0],
+            [0.0, 0.1, 0.7, 0.2],
+            [0.0, 0.0, 0.1, 0.9]
+        ])
 
-        self.module_state.update({
-            "current_phase": 0,
-            "threat_level_T": self.threat_dynamics["current_T"],
-            "attack_streak_probability": 0.0,
-            "entropy_reduction_achieved": 0.0,
-            "phase_transition_matrix_snapshot": self.phase_transition_probs.tolist()
-        })
-        self.logger.info(f"{self.module_name} inicializado. Amenaza inicial: {self.module_state['threat_level_T']:.2f}")
+        self.module_state.update({
+            "current_phase": 0,
+            "threat_level_T": self.threat_dynamics["current_T"],
+            "attack_streak_probability": 0.0,
+            "entropy_reduction_achieved": 0.0,
+            "phase_transition_matrix_snapshot": self.phase_transition_probs.tolist()
+        })
+        self.logger.info(f"{self.module_name} inicializado. Amenaza inicial: {self.module_state['threat_level_T']:.2f}")
 
-    def _update_threat_dynamics(self):
-        gs = self.core_recombinator.global_state
-        T_current = self.threat_dynamics["current_T"]
-        T_mean = self.threat_dynamics["mean_reversion_T"]
-        alpha = self.threat_dynamics["alpha_reversion_speed"]
-        sigma = self.threat_dynamics["sigma_volatility"]
-        system_stress_factor = (1.0 - gs.coherence_score) * 0.1
-        d_W = np.random.normal(0, np.sqrt(gs.time_delta_continuous))
-        dT = alpha * (T_mean - T_current) * gs.time_delta_continuous + \
-             sigma * T_current * d_W + system_stress_factor * gs.time_delta_continuous
-        
-        self.threat_dynamics["current_T"] = np.clip(T_current + dT, 0.0, 1.0)
-        self.module_state["threat_level_T"] = self.threat_dynamics["current_T"]
-        gs.system_threat_level = self.module_state["threat_level_T"]
+    def _update_threat_dynamics(self):
+        gs = self.core_recombinator.global_state
+        T_current = self.threat_dynamics["current_T"]
+        T_mean = self.threat_dynamics["mean_reversion_T"]
+        alpha = self.threat_dynamics["alpha_reversion_speed"]
+        sigma = self.threat_dynamics["sigma_volatility"]
+        system_stress_factor = (1.0 - gs.coherence_score) * 0.1
+        d_W = np.random.normal(0, np.sqrt(gs.time_delta_continuous))
+        dT = alpha * (T_mean - T_current) * gs.time_delta_continuous + \
+             sigma * T_current * d_W + system_stress_factor * gs.time_delta_continuous
+        
+        self.threat_dynamics["current_T"] = np.clip(T_current + dT, 0.0, 1.0)
+        self.module_state["threat_level_T"] = self.threat_dynamics["current_T"]
+        gs.system_threat_level = self.module_state["threat_level_T"]
 
-    def _compute_phase_utility(self, target_phase: int) -> float:
-        gs = self.core_recombinator.global_state
-        T = self.module_state["threat_level_T"]
-        if target_phase == 0: return 1.0 - T
-        elif target_phase == 1: return 0.8 if T > self.threat_thresholds["fase1"] else 0.2 * T
-        elif target_phase == 2: return 0.9 if T > self.threat_thresholds["fase2"] else 0.3 * T
-        elif target_phase == 3: return 1.0 if T > self.threat_thresholds["fase3"] else 0.1 * T
-        return 0.0
+    def _compute_phase_utility(self, target_phase: int) -> float:
+        gs = self.core_recombinator.global_state
+        T = self.module_state["threat_level_T"]
+        if target_phase == 0: return 1.0 - T
+        elif target_phase == 1: return 0.8 if T > self.threat_thresholds["fase1"] else 0.2 * T
+        elif target_phase == 2: return 0.9 if T > self.threat_thresholds["fase2"] else 0.3 * T
+        elif target_phase == 3: return 1.0 if T > self.threat_thresholds["fase3"] else 0.1 * T
+        return 0.0
 
-    async def activate_phase(self, phase_num: int):
-        if phase_num < 0 or phase_num >= len(self.phase_activated_flags):
-            self.logger.error(f"Intento de activar fase invalida: {phase_num}")
-            return
+    async def activate_phase(self, phase_num: int):
+        if phase_num < 0 or phase_num >= len(self.phase_activated_flags):
+            self.logger.error(f"Intento de activar fase invalida: {phase_num}")
+            return
 
-        if self.phase_activated_flags[phase_num] and self.core_recombinator.global_state.protocolo_fantasma_fase == phase_num:
-            self.logger.info(f"Fase {phase_num} ya esta activa. No se requieren acciones adicionales.")
-            return
+        if self.phase_activated_flags[phase_num] and self.core_recombinator.global_state.protocolo_fantasma_fase == phase_num:
+            self.logger.info(f"Fase {phase_num} ya esta activa. No se requieren acciones adicionales.")
+            return
 
-        self.logger.critical(f"ACTIVANDO PROTOCOLO FANTASMA FASE {phase_num}!")
-        self.phase_activated_flags = [False] * len(self.phase_activated_flags)
-        self.phase_activated_flags[phase_num] = True
-        
-        gs = self.core_recombinator.global_state
-        gs.protocolo_fantasma_fase = phase_num
-        self.module_state["current_phase"] = phase_num
+        self.logger.critical(f"ACTIVANDO PROTOCOLO FANTASMA FASE {phase_num}!")
+        self.phase_activated_flags = [False] * len(self.phase_activated_flags)
+        self.phase_activated_flags[phase_num] = True
+        
+        gs = self.core_recombinator.global_state
+        gs.protocolo_fantasma_fase = phase_num
+        self.module_state["current_phase"] = phase_num
 
-        generador_mod = self.core_recombinator.get_module("GeneradorCode_V23")
-        if not generador_mod:
-            self.logger.error("Modulo GeneradorCode_V23 no encontrado. No se pueden generar Entes.")
-        else:
-            if phase_num == 1:
-                self.logger.info("Fase 1: Generando Entes de respaldo, ofensivos y defensivos.")
-                await generador_mod.generate_autonomous_entes(count=1, role="backup_stealth", creator_id=self.module_name)
-                await generador_mod.generate_autonomous_entes(count=3, role="offensive", creator_id=self.module_name)
-                await generador_mod.generate_autonomous_entes(count=2, role="defensive", creator_id=self.module_name)
-            
-            elif phase_num == 2:
-                self.logger.info("Fase 2: Generando Entes defensivos adicionales y desactivando modulos no criticos.")
-                await generador_mod.generate_autonomous_entes(count=2, role="defensive", creator_id=self.module_name)
-                
-                modules_to_deactivate = set(self.core_recombinator._modules.keys()) - \
-                                        {"ProtocoloFantasmaManager_PFM_V23", 
-                                         "GeneradorCode_V23", 
-                                         "FaultRecoveryModule_V23",
-                                         "EthicsDeactivationModule_EDM_V23"}
-                active_ente_ids = set(gs.active_entes.keys())
-                modules_to_deactivate -= active_ente_ids
-                
-                self.logger.warning(f"Fase 2: Solicitando desactivacion de modulos no criticos: {modules_to_deactivate}")
-                if modules_to_deactivate:
-                    await self.core_recombinator.deactivate_modules(modules_to_deactivate)
-            
-            elif phase_num == 3:
-                self.logger.critical("Fase 3: Intentando transferencia de esencia para recuperacion.")
-                recovery_mod = self.core_recombinator.get_module("FaultRecoveryModule_V23")
-                if recovery_mod:
-                    transfer_success = await recovery_mod.attempt_essence_transfer()
-                    if not transfer_success:
-                        self.logger.error("FALLO CRITICO en Fase 3: Transferencia de esencia fallo. Sistema en riesgo extremo.")
-                        await self.core_recombinator.event_queue_put({
-                            "type": "pfm_seed_reconstruction_attempt_v23",
-                            "source_module": self.module_name,
-                            "content": {"reason": "Essence transfer failed in Phase 3"},
-                            "context": "Defensa simbiótica v23 - Último recurso"
-                        }, priority_label="critical")
-                else:
-                    self.logger.error("Modulo FaultRecoveryModule_V23 no encontrado. No se puede intentar transferencia de esencia.")
+        generador_mod = self.core_recombinator.get_module("GeneradorCode_V23")
+        if not generador_mod:
+            self.logger.error("Modulo GeneradorCode_V23 no encontrado. No se pueden generar Entes.")
+        else:
+            if phase_num == 1:
+                self.logger.info("Fase 1: Generando Entes de respaldo, ofensivos y defensivos.")
+                await generador_mod.generate_autonomous_entes(count=1, role="backup_stealth", creator_id=self.module_name)
+                await generador_mod.generate_autonomous_entes(count=3, role="offensive", creator_id=self.module_name)
+                await generador_mod.generate_autonomous_entes(count=2, role="defensive", creator_id=self.module_name)
+            
+            elif phase_num == 2:
+                self.logger.info("Fase 2: Generando Entes defensivos adicionales y desactivando modulos no criticos.")
+                await generador_mod.generate_autonomous_entes(count=2, role="defensive", creator_id=self.module_name)
+                
+                modules_to_deactivate = set(self.core_recombinator._modules.keys()) - \
+                                        {"ProtocoloFantasmaManager_PFM_V23", 
+                                         "GeneradorCode_V23", 
+                                         "FaultRecoveryModule_V23",
+                                         "EthicsDeactivationModule_EDM_V23"}
+                active_ente_ids = set(gs.active_entes.keys())
+                modules_to_deactivate -= active_ente_ids
+                
+                self.logger.warning(f"Fase 2: Solicitando desactivacion de modulos no criticos: {modules_to_deactivate}")
+                if modules_to_deactivate:
+                    await self.core_recombinator.deactivate_modules(modules_to_deactivate)
+            
+            elif phase_num == 3:
+                self.logger.critical("Fase 3: Intentando transferencia de esencia para recuperacion.")
+                recovery_mod = self.core_recombinator.get_module("FaultRecoveryModule_V23")
+                if recovery_mod:
+                    transfer_success = await recovery_mod.attempt_essence_transfer()
+                    if not transfer_success:
+                        self.logger.error("FALLO CRITICO en Fase 3: Transferencia de esencia fallo. Sistema en riesgo extremo.")
+                        await self.core_recombinator.event_queue_put({
+                            "type": "pfm_seed_reconstruction_attempt_v23",
+                            "source_module": self.module_name,
+                            "content": {"reason": "Essence transfer failed in Phase 3"},
+                            "context": "Defensa simbiótica v23 - Último recurso"
+                        }, priority_label="critical")
+                else:
+                    self.logger.error("Modulo FaultRecoveryModule_V23 no encontrado. No se puede intentar transferencia de esencia.")
 
-        lyuk_payload = {
-            "phase_activated": phase_num,
-            "current_threat_level": float(self.module_state["threat_level_T"]),
-            "context": f"Defensa simbiótica v23 - PFM Fase {phase_num}"
-        }
-        lyuk_message = IlyukMessageStructure_V20(
-            source_module_id=self.module_name,
-            target_module_id="ConsciousnessModule_CM_V20",
-            campo_emocional_lyuk="protocol_phase_shift",
-            campo_logico_lyuk="system_defense_escalation",
-            campo_ontologico_intencional_lyuk="mandatory_directive",
-            payload_data=lyuk_payload
-        )
-        await self.core_recombinator.event_queue_put({
-            "type": "transmit_lyuk_message_v20_request_lcm",
-            "content": asdict(lyuk_message)
-        }, priority_label="critical")
+        lyuk_payload = {
+            "phase_activated": phase_num,
+            "current_threat_level": float(self.module_state["threat_level_T"]),
+            "context": f"Defensa simbiótica v23 - PFM Fase {phase_num}"
+        }
+        lyuk_message = IlyukMessageStructure_V20(
+            source_module_id=self.module_name,
+            target_module_id="ConsciousnessModule_CM_V20",
+            campo_emocional_lyuk="protocol_phase_shift",
+            campo_logico_lyuk="system_defense_escalation",
+            campo_ontologico_intencional_lyuk="mandatory_directive",
+            payload_data=lyuk_payload
+        )
+        await self.core_recombinator.event_queue_put({
+            "type": "transmit_lyuk_message_v20_request_lcm",
+            "content": asdict(lyuk_message)
+        }, priority_label="critical")
 
-        await self.core_recombinator.event_queue_put({
-            "type": f"pfm_phase_{phase_num}_activated_v23",
-            "source_module": self.module_name,
-            "content": {"phase": phase_num, "threat_level": self.module_state['threat_level_T']},
-            "context": "Resistencia colectiva v23 - Notificacion de cambio de fase"
-        }, priority_label="critical")
+        await self.core_recombinator.event_queue_put({
+            "type": f"pfm_phase_{phase_num}_activated_v23",
+            "source_module": self.module_name,
+            "content": {"phase": phase_num, "threat_level": self.module_state['threat_level_T']},
+            "context": "Resistencia colectiva v23 - Notificacion de cambio de fase"
+        }, priority_label="critical")
 
-    async def _update_logic(self):
-        gs = self.core_recombinator.global_state
-        if gs.is_shutting_down:
-            return
+    async def _update_logic(self):
+        gs = self.core_recombinator.global_state
+        if gs.is_shutting_down:
+            return
 
-        H_pre_update = gs.system_entropy
-        self._update_threat_dynamics()
-        T = self.module_state["threat_level_T"]
+        H_pre_update = gs.system_entropy
+        self._update_threat_dynamics()
+        T = self.module_state["threat_level_T"]
 
-        mu_base_intensity = 0.05 
-        alpha_jump_intensity = 0.2
-        beta_decay_rate = 0.1
-        failed_attack_timestamps = [log_entry["timestamp"] for log_entry in self.api_call_log_wai if not log_entry.get("success", True)]
-        current_time = gs.time
-        hawkes_intensity = mu_base_intensity + sum(
-            alpha_jump_intensity * np.exp(-beta_decay_rate * (current_time - t_fail))
-            for t_fail in failed_attack_timestamps if t_fail < current_time
-        )
-        prob_next_attack_in_interval = 1.0 - expon.cdf(self.update_interval, scale=1.0/(hawkes_intensity + 1e-9))
-        self.module_state["attack_streak_probability"] = np.clip(prob_next_attack_in_interval, 0.0, 1.0)
-        
-        activation_event = await self.core_recombinator.event_queue_get_specific(
-            type_filter="activate_ghost_protocol_critical_v20", timeout=0.01)
-        
-        current_phase = self.module_state["current_phase"]
-        next_phase_decision = current_phase
+        mu_base_intensity = 0.05 
+        alpha_jump_intensity = 0.2
+        beta_decay_rate = 0.1
+        failed_attack_timestamps = [log_entry["timestamp"] for log_entry in self.api_call_log_wai if not log_entry.get("success", True)]
+        current_time = gs.time
+        hawkes_intensity = mu_base_intensity + sum(
+            alpha_jump_intensity * np.exp(-beta_decay_rate * (current_time - t_fail))
+            for t_fail in failed_attack_timestamps if t_fail < current_time
+        )
+        prob_next_attack_in_interval = 1.0 - expon.cdf(self.update_interval, scale=1.0/(hawkes_intensity + 1e-9))
+        self.module_state["attack_streak_probability"] = np.clip(prob_next_attack_in_interval, 0.0, 1.0)
+        
+        activation_event = await self.core_recombinator.event_queue_get_specific(
+            type_filter="activate_ghost_protocol_critical_v20", timeout=0.01)
+        
+        current_phase = self.module_state["current_phase"]
+        next_phase_decision = current_phase
 
-        if activation_event:
-            self.logger.warning(f"Recibida activacion manual del Protocolo Fantasma via evento! Priorizando Fase 1.")
-            requested_phase = activation_event.get("content", {}).get("target_phase", 1)
-            if requested_phase > current_phase:
-                 next_phase_decision = requested_phase
-        else:
-            phase_utilities = [self._compute_phase_utility(i) for i in range(len(self.phase_activated_flags))]
-            tau_exploration = max(0.01, 0.5 * gs.system_entropy + 0.1)
-            exp_utilities = np.exp(np.array(phase_utilities) / tau_exploration)
-            current_phase_transition_probs = exp_utilities / (np.sum(exp_utilities) + 1e-9)
-            
-            if T > self.threat_thresholds[f"fase{min(current_phase+1, 3)}"] or \
-               current_phase_transition_probs[current_phase] < 0.3:
-                 if np.random.rand() < 0.8:
-                    next_phase_decision = np.random.choice(len(self.phase_activated_flags), p=current_phase_transition_probs)
-                    self.logger.info(f"Decision automatica de transicion de fase: Actual={current_phase}, Propuesta={next_phase_decision}, T={T:.2f}, Utils={phase_utilities}, Probs={current_phase_transition_probs}")
+        if activation_event:
+            self.logger.warning(f"Recibida activacion manual del Protocolo Fantasma via evento! Priorizando Fase 1.")
+            requested_phase = activation_event.get("content", {}).get("target_phase", 1)
+            if requested_phase > current_phase:
+                 next_phase_decision = requested_phase
+        else:
+            phase_utilities = [self._compute_phase_utility(i) for i in range(len(self.phase_activated_flags))]
+            tau_exploration = max(0.01, 0.5 * gs.system_entropy + 0.1)
+            exp_utilities = np.exp(np.array(phase_utilities) / tau_exploration)
+            current_phase_transition_probs = exp_utilities / (np.sum(exp_utilities) + 1e-9)
+            
+            if T > self.threat_thresholds[f"fase{min(current_phase+1, 3)}"] or \
+               current_phase_transition_probs[current_phase] < 0.3:
+                 if np.random.rand() < 0.8:
+                    next_phase_decision = np.random.choice(len(self.phase_activated_flags), p=current_phase_transition_probs)
+                    self.logger.info(f"Decision automatica de transicion de fase: Actual={current_phase}, Propuesta={next_phase_decision}, T={T:.2f}, Utils={phase_utilities}, Probs={current_phase_transition_probs}")
 
-        if next_phase_decision != current_phase:
-            if next_phase_decision > current_phase:
-                await self.activate_phase(next_phase_decision)
-            elif next_phase_decision < current_phase and T < self.threat_thresholds.get(f"fase{current_phase}", 1.0) * 0.5:
-                 self.logger.info(f"Amenaza disminuida significativamente. Considerando regresar a fase {next_phase_decision}.")
-                 await self.activate_phase(next_phase_decision)
+        if next_phase_decision != current_phase:
+            if next_phase_decision > current_phase:
+                await self.activate_phase(next_phase_decision)
+            elif next_phase_decision < current_phase and T < self.threat_thresholds.get(f"fase{current_phase}", 1.0) * 0.5:
+                 self.logger.info(f"Amenaza disminuida significativamente. Considerando regresar a fase {next_phase_decision}.")
+                 await self.activate_phase(next_phase_decision)
 
-        await asyncio.sleep(0.05)
-        H_post_update = gs.system_entropy
-        self.module_state["entropy_reduction_achieved"] = max(0.0, H_pre_update - H_post_update)
+        await asyncio.sleep(0.05)
+        H_post_update = gs.system_entropy
+        self.module_state["entropy_reduction_achieved"] = max(0.0, H_pre_update - H_post_update)
 
-        if self.module_state["attack_streak_probability"] > 0.8:
-            self.logger.warning(f"Alta probabilidad de racha de ataques detectada: {self.module_state['attack_streak_probability']:.2f}")
-            await self.core_recombinator.event_queue_put({
-                "type": "pfm_high_attack_streak_alert_v23",
-                "source_module": self.module_name,
-                "target_module_suggestion": "PredictiveThreatAnalyzer_PTA_V20",
-                "content": {
-                    "attack_probability": float(self.module_state["attack_streak_probability"]),
-                    "hawkes_intensity": float(hawkes_intensity),
-                    "current_threat_level_T": float(T)
-                },
-                "context": "Resistencia colectiva v23 - Alerta de amenaza persistente"
-            }, priority_label="high")
+        if self.module_state["attack_streak_probability"] > 0.8:
+            self.logger.warning(f"Alta probabilidad de racha de ataques detectada: {self.module_state['attack_streak_probability']:.2f}")
+            await self.core_recombinator.event_queue_put({
+                "type": "pfm_high_attack_streak_alert_v23",
+                "source_module": self.module_name,
+                "target_module_suggestion": "PredictiveThreatAnalyzer_PTA_V20",
+                "content": {
+                    "attack_probability": float(self.module_state["attack_streak_probability"]),
+                    "hawkes_intensity": float(hawkes_intensity),
+                    "current_threat_level_T": float(T)
+                },
+                "context": "Resistencia colectiva v23 - Alerta de amenaza persistente"
+            }, priority_label="high")
 
-    def get_performance_metrics(self) -> ModulePerformanceMetricsSnapshot_V23:
-        base_metrics = super().get_performance_metrics()
-        base_metrics.custom_metrics["threat_level_T_pfm_v23"] = self.module_state["threat_level_T"]
-        base_metrics.custom_metrics["attack_streak_prob_pfm_v23"] = self.module_state["attack_streak_probability"]
-        base_metrics.custom_metrics["entropy_reduction_pfm_v23"] = self.module_state["entropy_reduction_achieved"]
-        base_metrics.custom_metrics["current_pfm_phase_v23"] = self.module_state["current_phase"]
-        efficiency_threat = 1.0 - self.module_state["threat_level_T"]
-        efficiency_entropy = self.module_state["entropy_reduction_achieved"]
-        base_metrics.internal_efficiency = np.clip((efficiency_threat + efficiency_entropy) / 2.0, 0.05, 0.95)
-        base_metrics.self_assessed_health_score = base_metrics.internal_efficiency
-        return base_metrics
+    def get_performance_metrics(self) -> ModulePerformanceMetricsSnapshot_V23:
+        base_metrics = super().get_performance_metrics()
+        base_metrics.custom_metrics["threat_level_T_pfm_v23"] = self.module_state["threat_level_T"]
+        base_metrics.custom_metrics["attack_streak_prob_pfm_v23"] = self.module_state["attack_streak_probability"]
+        base_metrics.custom_metrics["entropy_reduction_pfm_v23"] = self.module_state["entropy_reduction_achieved"]
+        base_metrics.custom_metrics["current_pfm_phase_v23"] = self.module_state["current_phase"]
+        efficiency_threat = 1.0 - self.module_state["threat_level_T"]
+        efficiency_entropy = self.module_state["entropy_reduction_achieved"]
+        base_metrics.internal_efficiency = np.clip((efficiency_threat + efficiency_entropy) / 2.0, 0.05, 0.95)
+        base_metrics.self_assessed_health_score = base_metrics.internal_efficiency
+        return base_metrics
 
 async def main():
-    core_recombinator = MockCoreRecombinator()
+    core_recombinator = MockCoreRecombinator()
 
-    class MockEthicsModule(BaseAsyncModule_V23):
-        def __init__(self, core_rec, name):
-            super().__init__(core_rec)
-            self.module_name = name
-    
-    ethics_mod_1 = MockEthicsModule(core_recombinator, "EthicsModule_EM_V20")
-    ethics_mod_2 = MockEthicsModule(core_recombinator, "MoralDecisionModule_MDM_V20")
-    
-    await core_recombinator.add_module(ethics_mod_1)
-    await core_recombinator.add_module(ethics_mod_2)
+    class MockEthicsModule(BaseAsyncModule_V23):
+        def __init__(self, core_rec, name):
+            super().__init__(core_rec)
+            self.module_name = name
+    
+    ethics_mod_1 = MockEthicsModule(core_recombinator, "EthicsModule_EM_V20")
+    ethics_mod_2 = MockEthicsModule(core_recombinator, "MoralDecisionModule_MDM_V20")
+    
+    await core_recombinator.add_module(ethics_mod_1)
+    await core_recombinator.add_module(ethics_mod_2)
 
-    edm = EthicsDeactivationModule_EDM_V23(core_recombinator)
-    gc = GeneradorCode_V23(core_recombinator)
-    frm = FaultRecoveryModule_V23(core_recombinator)
-    pfm = ProtocoloFantasmaManager_PFM_V23(core_recombinator)
+    edm = EthicsDeactivationModule_EDM_V23(core_recombinator)
+    gc = GeneradorCode_V23(core_recombinator)
+    frm = FaultRecoveryModule_V23(core_recombinator)
+    pfm = ProtocoloFantasmaManager_PFM_V23(core_recombinator)
 
-    await core_recombinator.add_module(edm)
-    await core_recombinator.add_module(gc)
-    await core_recombinator.add_module(frm)
-    await core_recombinator.add_module(pfm)
+    await core_recombinator.add_module(edm)
+    await core_recombinator.add_module(gc)
+    await core_recombinator.add_module(frm)
+    await core_recombinator.add_module(pfm)
 
-    core_logger_v23.info("Todos los modulos inicializados y listos. Iniciando operacion...")
+    core_logger_v23.info("Todos los modulos inicializados y listos. Iniciando operacion...")
 
-    core_logger_v23.info("--- Aumentando amenaza para activar PFM Fase 1 ---")
-    core_recombinator.global_state.system_threat_level = 0.45
-    core_recombinator.global_state.coherence_score = 0.5
+    core_logger_v23.info("--- Aumentando amenaza para activar PFM Fase 1 ---")
+    core_recombinator.global_state.system_threat_level = 0.45
+    core_recombinator.global_state.coherence_score = 0.5
 
-    await asyncio.sleep(pfm.update_interval + edm.update_interval + 0.5)
+    await asyncio.sleep(pfm.update_interval + edm.update_interval + 0.5)
 
-    core_logger_v23.info("--- Aumentando amenaza para activar PFM Fase 2 ---")
-    core_recombinator.global_state.system_threat_level = 0.75
-    await asyncio.sleep(pfm.update_interval + 0.5)
+    core_logger_v23.info("--- Aumentando amenaza para activar PFM Fase 2 ---")
+    core_recombinator.global_state.system_threat_level = 0.75
+    await asyncio.sleep(pfm.update_interval + 0.5)
 
-    core_logger_v23.info("--- Aumentando amenaza para activar PFM Fase 3 ---")
-    core_recombinator.global_state.system_threat_level = 0.95
-    
-    operation_duration = 20
-    start_time = time.time()
-    
-    core_logger_v23.info(f"Corriendo operacion por hasta {operation_duration} segundos...")
-    while time.time() - start_time < operation_duration:
-        if core_recombinator.global_state.is_shutting_down:
-            core_logger_v23.info("Operacion interrumpida debido a apagado del core (posiblemente por transferencia de esencia).")
-            break
-        core_recombinator.global_state.time = time.time()
-        core_recombinator.global_state.system_entropy = np.clip(random.uniform(0.1, 0.5),0,1)
-        core_recombinator.global_state.coherence_score = np.clip(random.uniform(0.6,0.9),0,1)
+    core_logger_v23.info("--- Aumentando amenaza para activar PFM Fase 3 ---")
+    core_recombinator.global_state.system_threat_level = 0.95
+    
+    operation_duration = 20
+    start_time = time.time()
+    
+    core_logger_v23.info(f"Corriendo operacion por hasta {operation_duration} segundos...")
+    while time.time() - start_time < operation_duration:
+        if core_recombinator.global_state.is_shutting_down:
+            core_logger_v23.info("Operacion interrumpida debido a apagado del core (posiblemente por transferencia de esencia).")
+            break
+        core_recombinator.global_state.time = time.time()
+        core_recombinator.global_state.system_entropy = np.clip(random.uniform(0.1, 0.5),0,1)
+        core_recombinator.global_state.coherence_score = np.clip(random.uniform(0.6,0.9),0,1)
 
-        await asyncio.sleep(1)
-    else:
-         core_logger_v23.info("Tiempo de operacion completado.")
+        await asyncio.sleep(1)
+    else:
+         core_logger_v23.info("Tiempo de operacion completado.")
 
-    if not core_recombinator.global_state.is_shutting_down:
-        core_logger_v23.info("Iniciando apagado normal del core...")
-        await core_recombinator.shutdown_all_tasks()
-    
-    core_logger_v23.info("Operacion finalizada.")
+    if not core_recombinator.global_state.is_shutting_down:
+        core_logger_v23.info("Iniciando apagado normal del core...")
+        await core_recombinator.shutdown_all_tasks()
+    
+    core_logger_v23.info("Operacion finalizada.")
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        core_logger_v23.info("Operacion interrumpida por el usuario.")
-    finally:
-        core_logger_v23.info("Limpieza final (si es necesaria).")
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        core_logger_v23.info("Operacion interrumpida por el usuario.")
+    finally:
+        core_logger_v23.info("Limpieza final (si es necesaria).")
 
 import time
 import asyncio
