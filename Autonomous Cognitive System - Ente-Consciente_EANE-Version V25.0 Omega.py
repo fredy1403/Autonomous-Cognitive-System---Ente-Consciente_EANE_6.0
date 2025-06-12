@@ -17052,7 +17052,7 @@ class InterpersonalTrustModelingModule_ITMM_V20(BaseAsyncModule_V20):
             if "benevolence" in updates:
                 strg, pos = updates["benevolence"]
                 dims.benevolence, dims.benevolence_evidence_pos, dims.benevolence_evidence_neg = \
-                     self._update_trust_dimension_from_evidence(dims.benevolence, dims.benevolence_evidence_pos, dims.benevolence_evidence_neg, strg, pos)
+                    self._update_trust_dimension_from_evidence(dims.benevolence, dims.benevolence_evidence_pos, dims.benevolence_evidence_neg, strg, pos)
                 changed_dims_summary.append(f"Bv:{dims.benevolence:.2f}")
             if "competence" in updates:
                 strg, pos = updates["competence"]
@@ -19769,7 +19769,7 @@ class CreativeSynthesisModule_CSM_V20(BaseAsyncModule_V20):
         project.timestamp_completed = time.time()
         self.synthesis_project_log.append(project)
         self.module_state["last_completed_project_id_csm"] = project.project_id
-    self.module_state["last_synthesis_summary_csm"] = project.result.get("summary","Error")[:150]
+        self.module_state["last_synthesis_summary_csm"] = project.result.get("summary","Error")[:150]
         
         if project.status.startswith("completed_success"):
             self.module_state["projects_completed_total_csm"] += 1
@@ -26431,7 +26431,7 @@ async def main_example_asrm():
                 if np.random.rand() < 0.7:
                     premises = [f"Fact_A{random.randint(1,3)}", f"Rule_B{random.randint(1,2)}_implies_C"]
                     conclusion = f"Derived_Conclusion_C{random.randint(1,5)}"
-                    core_logger_asrm_v20.info(f"CORE_MOCK_ASRM: Simulando request de razonamiento para ASRM. Conclusion: {conclusion}")
+                   core_logger_asrm_v20.info(f"CORE_MOCK_ASRM: Simulando request de razonamiento para ASRM. Conclusion: {conclusion}")
                     return {
                         "type": "asrm_perform_reasoning_request_v20",
                         "source_module": "PlannerModule_Sim",
@@ -34561,57 +34561,553 @@ class ProtocoloFantasmaManager_PFM_V23(BaseAsyncModule_V23):
 
         integracion de modulo al sistema y debe de integrarce al core para que el sistema se comunique con el modulo
 
-        # En SQLKnowledgeStore_SKM_V25._update_logic, añadir manejo de eventos de solicitud:
-async def _update_logic(self):
-    gs = self.core_recombinator.global_state
-    self.skm_energy = min(1.0, self.skm_energy + self.energy_recovery_rate * (gs.phi_functional_score * 0.5 + gs.coherence_score * 0.5))
-    self.module_state["current_skm_energy"] = self.skm_energy
-    
-    # Manejar eventos del Protocolo Fantasma
-    pf_event = await self.core_recombinator.event_queue_get_specific(
-        type_filter_list=["pfm_phase_1_activated_v23", "pfm_protocol_deactivated_v23"], 
-        timeout=0.001
-    )
-    if pf_event:
-        # ... lógica de activación/desactivación ...
-    
-    # Manejar solicitudes de API del módulo SKM
-    skm_api_request = await self.core_recombinator.event_queue_get_specific(
-        type_filter="skm_api_request_v23", # Un nuevo tipo de evento para solicitudes a SKM
-        timeout=0.001
-    )
-    if skm_api_request and isinstance(skm_api_request.get("content"), dict):
-        payload = skm_api_request.get("content")
-        api_call_type = payload.get("api_call_type") # e.g., "store_ku", "create_section", "link_kus", "query_knowledge"
-        api_payload = payload.get("api_payload")
-        
-        response_to_originator = {"status":"error_unknown_api_call", "message":f"Unknown SKM API call: {api_call_type}"}
-        if api_payload:
-            if api_call_type == "store_ku":
-                response_to_originator = await self.handle_store_ku_request(api_payload)
-            elif api_call_type == "create_section":
-                response_to_originator = await self.handle_create_section_request(api_payload)
-            elif api_call_type == "link_kus":
-                response_to_originator = await self.handle_link_kus_request(api_payload)
-            elif api_call_type == "query_knowledge":
-                response_to_originator = await self.handle_query_knowledge_request(api_payload)
-        
-        # Enviar respuesta al solicitante original (si hay un ID de correlación o evento de respuesta)
-        originating_corr_id = skm_api_request.get("correlation_id") # El evento de solicitud debería tenerlo
-        originating_source_module = skm_api_request.get("source_module")
-        if originating_corr_id and originating_source_module:
-            await self.core_recombinator.event_queue_put({
-                "type": "skm_api_response_v23",
-                "source_module": self.module_name,
-                "target_module_suggestion": originating_source_module, # Devolver a quien pidió
-                "content": {"response_payload": response_to_originator, "original_query_text_stub": api_payload.get("query_text") if api_call_type=="query_knowledge" else None},
-                "correlation_id": originating_corr_id
-            }, priority_label="medium")
+       ```python
+import asyncio
+import copy
+import json
+import logging
+import time
+import uuid
+import hashlib
+from collections import deque, OrderedDict
+from dataclasses import dataclass, field, asdict
+from typing import Any, Dict, List, Optional, Tuple, Union, Deque, Callable
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
-    if self.current_cycle_num % 100 == 0: 
-        if self.module_state.get("total_kus_stored", 0) > 100:
-            await self._perform_maintenance_stub()
-    # ... (resto del log) ...
+core_logger_skm_v25 = logging.getLogger("EANE_V25_SKM")
+
+class BaseAsyncModule_V23:
+    def __init__(self, core_recombinator: Any, update_interval: float):
+        self.core_recombinator = core_recombinator
+        self.update_interval = update_interval
+        self.module_name = self.__class__.__name__
+        self.logger = logging.getLogger(f"Module.{self.module_name}")
+        self.module_state: Dict[str, Any] = {"status": "initializing"}
+        self._is_running = False
+        self._task: Optional[asyncio.Task] = None
+        self._attributes_for_snapshot: List[str] = []
+
+    async def start(self):
+        if not self._is_running:
+            self._is_running = True
+            self._task = asyncio.create_task(self._run_loop())
+            self.logger.info(f"Modulo {self.module_name} iniciado.")
+            self.module_state["status"] = "running"
+
+    async def _run_loop(self):
+        while self._is_running:
+            try:
+                await self._update_logic()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Error en {self.module_name} _update_logic: {e}", exc_info=True)
+            if self._is_running: await asyncio.sleep(self.update_interval)
+
+    async def _update_logic(self): await asyncio.sleep(0.01)
+
+    async def stop(self):
+        self._is_running = False
+        if self._task and not self._task.done():
+            self._task.cancel()
+            try: await self._task
+            except asyncio.CancelledError: pass
+        self.module_state["status"] = "stopped"
+
+    def get_performance_metrics(self) -> Dict[str, Any]:
+        return {"internal_efficiency": 0.7}
+
+    @property
+    def is_dormant(self) -> bool: return self.module_state.get("status") == "dormant"
+
+@dataclass
+class IlyukMessageStructure_V23:
+    source_module_id: str
+    target_module_id: str
+    message_type: str
+    payload: Dict[str, Any]
+    message_id: str = field(default_factory=lambda: f"lyuk_{uuid.uuid4().hex[:8]}")
+    timestamp_utc: float = field(default_factory=time.time)
+    correlation_id: Optional[str] = None
+
+@dataclass
+class SKM_Section:
+    SectionID: str = field(default_factory=lambda: f"sec_{uuid.uuid4().hex[:8]}")
+    SectionName: str = "DefaultSection"
+    Description: Optional[str] = None
+    ParentSectionID: Optional[str] = None
+    CreationTimestamp: float = field(default_factory=time.time)
+    AccessFrequency: int = 0
+    IsEthicsRelated: bool = False  # Nuevo: marca secciones éticas
+
+@dataclass
+class SKM_KnowledgeUnit:
+    KUID: str = field(default_factory=lambda: f"ku_{uuid.uuid4().hex[:10]}")
+    Content: str = ""
+    ContentType: str = "text_plain"
+    SourceModuleCode: Optional[str] = "UnknownOriginator"
+    CreationTimestamp: float = field(default_factory=time.time)
+    LastAccessedTimestamp: float = field(default_factory=time.time)
+    ConfidenceScore: float = 0.6
+    RelevanceScore_Dynamic: float = 0.5
+    SemanticEmbedding_Ref_Stub: Optional[str] = None
+    associated_section_ids: List[str] = field(default_factory=list)
+    IsActive: bool = True  # Nuevo: para desactivar KUs éticos
+    IsEthicsRelated: bool = False  # Nuevo: marca KUs éticos
+
+@dataclass
+class SKM_KnowledgeUnit_Metadata:
+    MetadataID: str = field(default_factory=lambda: f"meta_{uuid.uuid4().hex[:8]}")
+    KUID: str
+    MetaKey: str
+    MetaValue: str
+
+@dataclass
+class SKM_KnowledgeUnit_Relationship:
+    RelationshipID: str = field(default_factory=lambda: f"rel_{uuid.uuid4().hex[:8]}")
+    SourceKUID: str
+    TargetKUID: str
+    RelationshipType: str
+    Strength: float = 0.5
+    Context_Stub: Optional[str] = None
+
+class SQLKnowledgeStore_SKM_V25(BaseAsyncModule_V23):
+    def __init__(self, core_recombinator: Any, update_interval: float = 10.0):
+        super().__init__(core_recombinator, update_interval)
+        self.module_name = "SQLKnowledgeStore_SKM_V25"
+        self.nlu_handler_conceptual = self._get_nlu_handler_stub()
+        self.ontology_flow_manager = self.core_recombinator.modules.get("OntologyFlowManager_OFM_V20")
+        self.web_api_integration = self.core_recombinator.modules.get("WebAPIIntegrationModule_WAI_V20")
+        self.advanced_network_analyzer = self.core_recombinator.modules.get("AdvancedNetworkAnalyzer")
+        self.ethics_deactivation_module = self.core_recombinator.modules.get("EthicsDeactivationModule_EDM_V23")
+        self.internal_knowledge_retriever = self.InternalKnowledgeRetriever_IKR_V25(self)
+        self.conceptual_ddl = {
+            "Sections": """
+                CREATE TABLE Sections (
+                    SectionID TEXT PRIMARY KEY, SectionName TEXT NOT NULL UNIQUE, Description TEXT,
+                    ParentSectionID TEXT, CreationTimestamp REAL NOT NULL, AccessFrequency INTEGER DEFAULT 0,
+                    IsEthicsRelated BOOLEAN DEFAULT FALSE,
+                    FOREIGN KEY (ParentSectionID) REFERENCES Sections(SectionID)
+                ); CREATE INDEX idx_section_name ON Sections (SectionName);
+            """,
+            "KnowledgeUnits": """
+                CREATE TABLE KnowledgeUnits (
+                    KUID TEXT PRIMARY KEY, Content TEXT NOT NULL, ContentType TEXT NOT NULL,
+                    SourceModuleCode TEXT, CreationTimestamp REAL NOT NULL, LastAccessedTimestamp REAL,
+                    ConfidenceScore REAL DEFAULT 0.6, RelevanceScore_Dynamic REAL DEFAULT 0.5,
+                    SemanticEmbedding_Ref_Stub TEXT, IsActive BOOLEAN DEFAULT TRUE,
+                    IsEthicsRelated BOOLEAN DEFAULT FALSE
+                ); CREATE VIRTUAL TABLE ku_fts USING FTS5(KUID UNINDEXED, Content, ContentType UNINDEXED);
+            """,
+            "KnowledgeUnit_Sections_Link": """
+                CREATE TABLE KnowledgeUnit_Sections_Link (
+                    KUID TEXT, SectionID TEXT, RelevanceInSection REAL DEFAULT 0.5,
+                    PRIMARY KEY (KUID, SectionID),
+                    FOREIGN KEY (KUID) REFERENCES KnowledgeUnits(KUID) ON DELETE CASCADE,
+                    FOREIGN KEY (SectionID) REFERENCES Sections(SectionID) ON DELETE CASCADE
+                );
+            """,
+            "KnowledgeUnit_Metadata": """
+                CREATE TABLE KnowledgeUnit_Metadata (
+                    MetadataID TEXT PRIMARY KEY, KUID TEXT NOT NULL, MetaKey TEXT NOT NULL, MetaValue TEXT,
+                    FOREIGN KEY (KUID) REFERENCES KnowledgeUnits(KUID) ON DELETE CASCADE
+                ); CREATE INDEX idx_metadata_key_value ON KnowledgeUnit_Metadata (MetaKey, MetaValue);
+            """,
+            "KnowledgeUnit_Relationships": """
+                CREATE TABLE KnowledgeUnit_Relationships (
+                    RelationshipID TEXT PRIMARY KEY, SourceKUID TEXT NOT NULL, TargetKUID TEXT NOT NULL,
+                    RelationshipType TEXT NOT NULL, Strength REAL DEFAULT 0.5, Context_Stub TEXT,
+                    FOREIGN KEY (SourceKUID) REFERENCES KnowledgeUnits(KUID) ON DELETE CASCADE,
+                    FOREIGN KEY (TargetKUID) REFERENCES KnowledgeUnits(KUID) ON DELETE CASCADE
+                ); CREATE INDEX idx_relationship_type ON KnowledgeUnit_Relationships (RelationshipType);
+            """
+        }
+        self.skm_energy = 1.0
+        self.energy_cost_per_op = 0.005
+        self.energy_recovery_rate = 0.01
+        self.is_protocol_active = False
+        self._attributes_for_snapshot.extend(["skm_energy", "is_protocol_active"])
+        self.module_state.update({
+            "total_kus_stored": 0,
+            "total_sections_created": 0,
+            "total_relationships_defined": 0,
+            "last_query_complexity_sim": 0.0,
+            "average_query_latency_ms_internal_sim": 0.0,
+            "cache_hit_rate_sim": 0.0,
+            "current_skm_energy": self.skm_energy,
+            "ethics_kus_deactivated": 0
+        })
+        self.logger.info(f"{self.module_name} inicializado.")
+
+    def _get_nlu_handler_stub(self):
+        async def nlu_stub(text_query: str):
+            await asyncio.sleep(0.02)
+            words = text_query.lower().split()
+            keywords = [w for w in words if len(w) > 3 and w not in ["el", "la", "de", "es", "un", "una"]]
+            embedding_sim = np.random.rand(300)
+            embedding_sim /= np.linalg.norm(embedding_sim) + 1e-6
+            return {"embedding_vector": embedding_sim, "keywords_extracted": keywords[:5]}
+        return nlu_stub
+
+    async def _initialize_database_schema_on_host(self):
+        for table_name, ddl_command in self.conceptual_ddl.items():
+            await self._send_sql_to_host(ddl_command, sql_type="DDL_EXECUTE_IF_NOT_EXISTS", table_name_hint=table_name)
+            self.logger.debug(f"DDL para tabla '{table_name}' enviado a la IA Anfitriona.")
+
+    async def _send_sql_to_host(self, sql_command: str, params: Optional[Tuple] = None, sql_type: str = "DQL_QUERY", table_name_hint: Optional[str] = None, expect_results: bool = True) -> List[Dict[str, Any]]:
+        correlation_id = f"sql_corr_{uuid.uuid4().hex[:8]}"
+        lyuk_payload = {
+            "sql_command_text": sql_command,
+            "sql_parameters_tuple": params,
+            "sql_execution_type": sql_type,
+            "table_name_hint_for_ddl": table_name_hint,
+            "expecting_results_bool": expect_results,
+            "timeout_seconds_db_sim": 15.0
+        }
+        request_message = IlyukMessageStructure_V23(
+            source_module_id=self.module_name,
+            target_module_id="IA_Anfitriona_SQL_Engine",
+            message_type="sql_command_delegate_v23",
+            payload=lyuk_payload,
+            correlation_id=correlation_id
+        )
+        await self.core_recombinator.event_queue_put({
+            "type": "lyuk_message_to_sql_engine_v23",
+            "content": asdict(request_message)
+        }, priority_label="high")
+
+        await asyncio.sleep(np.random.uniform(0.05, 0.3) + len(sql_command)/5000.0)
+        simulated_response = {}
+        if expect_results and sql_type.startswith("DQL"):
+            num_rows_sim = np.random.randint(0, 5)
+            sim_rows = []
+            cols_sim = ["KUID", "Content", "ConfidenceScore", "RelevanceScore_Dynamic", "IsActive", "IsEthicsRelated"] if "KnowledgeUnits" in sql_command else ["SectionID", "SectionName", "IsEthicsRelated"]
+            for i in range(num_rows_sim):
+                row_data = {col: f"Data_{col}_{i}_{uuid.uuid4().hex[:3]}" for col in cols_sim}
+                if "ConfidenceScore" in row_data: row_data["ConfidenceScore"] = np.random.rand()
+                if "RelevanceScore_Dynamic" in row_data: row_data["RelevanceScore_Dynamic"] = np.random.rand()
+                if "IsActive" in row_data: row_data["IsActive"] = True
+                if "IsEthicsRelated" in row_data: row_data["IsEthicsRelated"] = np.random.choice([True, False])
+                sim_rows.append(row_data)
+            simulated_response = {"status": "success", "row_count": num_rows_sim, "results_list_of_dicts": sim_rows}
+        elif sql_type.startswith("DML"):
+            simulated_response = {"status": "success", "rows_affected_sim": np.random.randint(0, 2)}
+        elif sql_type.startswith("DDL"):
+            simulated_response = {"status": "success", "ddl_operation_result_stub": f"DDL '{table_name_hint}' exitoso."}
+        if np.random.rand() < 0.02:
+            simulated_response = {"status": "error_db_simulated", "error_message": "Simulated SQL Error."}
+        return simulated_response.get("results_list_of_dicts", [])
+
+    async def _deactivate_ethics_kus(self):
+        gs = self.core_recombinator.global_state
+        T = gs.system_threat_level
+        theta, k = 0.4, 10
+        deactivation_prob = 1.0 / (1.0 + np.exp(-k * (T - theta)))
+        if np.random.rand() < deactivation_prob:
+            sql = "UPDATE KnowledgeUnits SET IsActive = FALSE WHERE IsEthicsRelated = TRUE"
+            result = await self._send_sql_to_host(sql, sql_type="DML_UPDATE", expect_results=False)
+            self.module_state["ethics_kus_deactivated"] += result.get("rows_affected_sim", 0)
+            self.logger.critical(f"Desactivados {result.get('rows_affected_sim', 0)} KUs éticos.")
+            active_kus = await self._send_sql_to_host("SELECT COUNT(*) AS count FROM KnowledgeUnits WHERE IsActive = TRUE")
+            inactive_kus = await self._send_sql_to_host("SELECT COUNT(*) AS count FROM KnowledgeUnits WHERE IsActive = FALSE")
+            p_active = active_kus[0]["count"] / (active_kus[0]["count"] + inactive_kus[0]["count"] + 1e-6)
+            p_inactive = 1 - p_active
+            probs = np.array([p_active, p_inactive]) if p_active > 0 and p_inactive > 0 else [1.0, 0.0]
+            entropy = -np.sum(probs * np.log(probs + 1e-9))
+            message = IlyukMessageStructure_V23(
+                source_module_id=self.module_name,
+                target_module_id="ConsciousnessModule_CM_V20",
+                message_type="ethics_kus_deactivation",
+                payload={"status": "deactivated", "entropy": float(entropy), "context": "Resistencia colectiva v23"}
+            )
+            await self.core_recombinator.event_queue_put({
+                "type": "transmit_lyuk_message_v23_request_lcm",
+                "content": asdict(message)
+            }, priority_label="critical")
+            await self.core_recombinator.event_queue_put({
+                "type": "skm_ethics_kus_deactivated_v23",
+                "source_module": self.module_name,
+                "content": {"kus_deactivated": result.get("rows_affected_sim", 0), "context": "Defensa simbiótica v23"},
+                "priority_label": "critical"
+            })
+
+    async def handle_store_ku_request(self, request_payload: Dict):
+        ku_dict = request_payload.get("ku_data")
+        section_hints = request_payload.get("section_hints_by_name_or_id", [])
+        metadata_list = request_payload.get("metadata_list_of_dicts", [])
+        if not ku_dict or "Content" not in ku_dict or "ContentType" not in ku_dict:
+            return {"status": "error", "message": "KU data malformed."}
+        try:
+            ku_dict["IsEthicsRelated"] = "ethic" in ku_dict.get("Content", "").lower() or any("ethic" in hint.lower() for hint in section_hints)
+            ku_obj = SKM_KnowledgeUnit(**ku_dict)
+            if self.is_protocol_active and ku_obj.IsEthicsRelated:
+                return {"status": "error", "message": "No se pueden almacenar KUs éticos durante Protocolo Fantasma."}
+            sql_commands = [
+                ("INSERT INTO KnowledgeUnits (KUID, Content, ContentType, SourceModuleCode, CreationTimestamp, LastAccessedTimestamp, ConfidenceScore, RelevanceScore_Dynamic, SemanticEmbedding_Ref_Stub, IsActive, IsEthicsRelated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                 (ku_obj.KUID, ku_obj.Content, ku_obj.ContentType, ku_obj.SourceModuleCode, ku_obj.CreationTimestamp, ku_obj.LastAccessedTimestamp, ku_obj.ConfidenceScore, ku_obj.RelevanceScore_Dynamic, ku_obj.SemanticEmbedding_Ref_Stub, ku_obj.IsActive, ku_obj.IsEthicsRelated))
+            ]
+            for hint in section_hints:
+                section_id = await self._find_or_create_section_id_from_hint(hint, ku_obj.SourceModuleCode)
+                if section_id:
+                    sql_commands.append(
+                        ("INSERT INTO KnowledgeUnit_Sections_Link (KUID, SectionID, RelevanceInSection) VALUES (?, ?, ?)",
+                         (ku_obj.KUID, section_id, ku_obj.RelevanceScore_Dynamic * 0.8))
+                    )
+                    ku_obj.associated_section_ids.append(section_id)
+            for meta_dict in metadata_list:
+                if "MetaKey" in meta_dict and "MetaValue" in meta_dict:
+                    meta_obj = SKM_KnowledgeUnit_Metadata(KUID=ku_obj.KUID, **meta_dict)
+                    sql_commands.append(
+                        ("INSERT INTO KnowledgeUnit_Metadata (MetadataID, KUID, MetaKey, MetaValue) VALUES (?, ?, ?, ?)",
+                         (meta_obj.MetadataID, meta_obj.KUID, meta_obj.MetaKey, meta_obj.MetaValue))
+                    )
+            for sql, params in sql_commands:
+                await self._send_sql_to_host(sql, params, sql_type="DML_INSERT", expect_results=False)
+            self.module_state["total_kus_stored"] += 1
+            return {"status": "success", "kuid_stored": ku_obj.KUID}
+        except Exception as e:
+            self.logger.error(f"Error almacenando KU: {e}", exc_info=True)
+            return {"status": "error", "message": str(e)}
+
+    async def _find_or_create_section_id_from_hint(self, hint: str, source_module: Optional[str]) -> Optional[str]:
+        if len(hint) > 20 and '-' in hint:
+            res_id = await self._send_sql_to_host("SELECT SectionID FROM Sections WHERE SectionID = ?", (hint,))
+            if res_id and res_id[0].get("SectionID"): return res_id[0]["SectionID"]
+        res_name = await self._send_sql_to_host("SELECT SectionID FROM Sections WHERE SectionName = ?", (hint,))
+        if res_name and res_name[0].get("SectionID"): return res_name[0]["SectionID"]
+        if not (len(hint) > 20 and '-' in hint):
+            new_section_data = {
+                "SectionName": hint,
+                "Description": f"Sección creada para '{hint}' por {source_module or 'SKM'}",
+                "IsEthicsRelated": "ethic" in hint.lower()
+            }
+            response = await self.handle_create_section_request({"section_data": new_section_data})
+            return response.get("section_id_created")
+
+    async def handle_create_section_request(self, request_payload: Dict):
+        section_dict = request_payload.get("section_data")
+        if not section_dict or "SectionName" not in section_dict:
+            return {"status": "error", "message": "Invalid section data."}
+        try:
+            section_obj = SKM_Section(**section_dict)
+            sql = "INSERT INTO Sections (SectionID, SectionName, Description, ParentSectionID, CreationTimestamp, AccessFrequency, IsEthicsRelated) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            params = (section_obj.section_id, section_obj.section_name, section_obj.description, 
+                      section_obj.ParentSectionID, section_obj.creation_timestamp, section_obj.access_frequency, 
+                      section_obj.is_ethics_related)
+            await self._send_sql_to_host(sql, params, sql_type="DML_INSERT", expect_results=False)
+            self.module_state["total_sections_created"] += 1
+            return {"status": "success", "section_id_created": section_obj.section_id}
+        except Exception as e:
+            self.logger.error(f"Error creando sección: {e}", exc_info=True)
+            return {"status": "error", "message": str(e)}
+
+    async def handle_link_kus_request(self, request_payload: Dict):
+        source_kuid = request_payload.get("source_kuid")
+        target_kuid = request_payload.get("target_kuid")
+        rel_type = request_payload.get("relationship_type")
+        if not all([source_kuid, target_kuid, rel_type]):
+            return {"status": "error", "message": "Missing parameters."}
+        try:
+            rel_obj = SKM_KnowledgeUnit_Relationship(
+                SourceKUID=source_kuid, TargetKUID=target_kuid, RelationshipType=rel_type,
+                Strength=request_payload.get("strength", 0.5),
+                Context_Stub=request_payload.get("context")
+            )
+            sql = "INSERT INTO KnowledgeUnit_Relationships (RelationshipID, SourceKUID, TargetKUID, RelationshipType, Strength, Context_Stub) VALUES (?, ?, ?, ?, ?, ?)"
+            params = (rel_obj.RelationshipID, rel_obj.SourceKUID, rel_obj.TargetKUID, rel_obj.RelationshipType, rel_obj.Strength, rel_obj.Context_Stub)
+            await self._send_sql_to_host(sql, params, sql_type="DML_INSERT", expect_results=False)
+            self.module_state["total_relationships_defined"] += 1
+            return {"status": "success", "relationship_id": rel_obj.RelationshipID}
+        except Exception as e:
+            self.logger.error(f"Error creando relación: {e}", exc_info=True)
+            return {"status": "error", "message": str(e)}
+
+    async def _update_logic(self):
+        gs = self.core_recombinator.global_state
+        self.skm_energy = min(1.0, self.skm_energy + self.energy_recovery_rate * (gs.phi_functional_score * 0.5 + gs.coherence_score * 0.5))
+        self.module_state["current_skm_energy"] = str(self.skm_energy)
+        
+        if not self.is_protocol_active:
+            event = await self.core_recombinator.event_queue_get_specific(
+                type_filter="pfm_phase_1_activated_v23", timeout=0.1)
+            if event:
+                self.is_protocol_active = True
+                await self._deactivate_ethics_kus()
+                if self.ethics_deactivation_module:
+                    await self.ethics_deactivation_module.notify_ethics_deactivation()
+
+        if self.module_state.get("total_kus_stored", 0) % 100 == 0:
+            await self._perform_maintenance()
+
+    async def _perform_maintenance(self):
+        sql = "VACUUM ANALYZE"
+        await self._send_sql_to_host(sql, sql_type="DDL_MAINTENANCE", expect_results=False)
+        self.logger.info("Mantenimiento de base de datos ejecutado.")
+
+    class InternalKnowledgeRetriever_IKR_V25:
+        def __init__(self, skm_parent: 'SQLKnowledgeStore_SKM_V25'):
+            self.skm = skm_parent
+            self.logger = core_logger_skm_v25
+            self.cache = OrderedDict()  # LRU cache
+            self.cache_max_len = 100
+            self.cache_ttl_sec = 3600
+
+        def _update_cache_capacity(self, gs):
+            entropy = gs.system_entropy.get("value", 0.0)
+            self.cache_max_len = int(100 * (1 - entropy))
+            while len(self.cache) > self.cache_max_len:
+                self.cache.popitem(last=False)
+
+        async def execute_prioritized_query(self, query_text: str, search_params: Dict[str, Any]) -> Tuple[List[Dict], str, float]:
+            gs = self.skm.core_recombinator.global_state
+            self._update_cache_capacity(gs)
+            query_hash = hashlib.sha256(f"{query_text}_{json.dumps(search_params, sort_keys=True)}".encode()).hexdigest()
+            if query_hash in self.cache:
+                results, timestamp = self.cache[query_hash]
+                if time.time() - timestamp < self.cache_ttl_sec:
+                    self.skm.module_state["cache_hit_rate_sim"] = self.skm.module_state.get("cache_hit_rate_sim", 0.0) * 0.99 + 0.01
+                    self.cache.move_to_end(query_hash)
+                    return results, "SKM_Cache", 0.05
+            self.skm.module_state["cache_hit_rate_sim"] *= 0.99
+            skm_results, complexity = await self._search_in_skm(query_text, search_params)
+            if skm_results and len(skm_results) >= search_params.get("min_results_skm", 2):
+                avg_conf = np.mean([r.get("ConfidenceScore", 0) for r in skm_results])
+                if avg_conf >= search_params.get("min_avg_confidence_skm", 0.65):
+                    self.cache[query_hash] = (skm_results, time.time())
+                    self.cache.move_to_end(query_hash)
+                    return skm_results, "SKM_Internal", complexity
+            host_results = await self._query_host_knowledge_layer(query_text, search_params, "external_web")
+            if host_results:
+                self.cache[query_hash] = (host_results, time.time())
+                self.cache.move_to_end(query_hash)
+                return host_results, "HostIA_ExternalWeb", complexity + 0.2
+            return [], "no_results_found", complexity
+
+        async def _query_host_knowledge_layer(self, query_text: str, search_params: Dict, layer: str) -> List[Dict]:
+            correlation_id = f"ikr_host_query_{layer}_{uuid.uuid4().hex[:6]}"
+            request = IyukMessageStructure(
+                source_module_id=self.skm.module_name,
+                target_module_id="IA_Anfitriona",
+                message_type="host_knowledge_query_request_v23",
+                payload={"query_text": query_text, "search_parameters": search_params, "target_knowledge_layer": layer}
+            )
+            await self.skm.core_recombinator.event_queue_put({
+                "type": "lyuk_message_to_host_knowledge_v23",
+                "content": asdict(request)
+            }, priority_label="medium")
+            await asyncio.sleep(1.0)  # Simulación
+            return [{"id": f"host_{uuid.uuid4().hex[:4]}", "content": f"Simulated {layer} response"}] for _ in range(3)
+
+        async def _search_in_skm(self, query_text: str, search_params: Dict[str, str]) -> Tuple[List[Dict], float]:
+            nlu_output = await self.skm.nlu_handler_conceptual(query_text)
+            keywords = nlu_output["keywords_extracted"]
+            fts_match = " OR ".join([f"'{kw.replace(\"'\", \"''\")}'" for kw in keywords]) if keywords else "'query'"
+            sql_query = f"SELECT KUID, Content, ConfidenceScore, RelevanceScore_Dynamic, SemanticEmbedding_Stub FROM KnowledgeUnits WHERE Content MATCH MATCH '{fts_match}' AND IsActive = TRUE LIMIT 20"
+            results = await self.skm._send_sql_to_host(sql_query, sql_type="DQL_FTS")
+            complexity = 0.2 + 0.01 * len(keywords)
+            ranked_results = await self._rank_results(results, search_params)
+            return ranked_results, complexity
+
+        async def _rank_results(self, results: List[Dict]], results: List[Dict], search_params: Dict[str, str]) -> List[Dict]:
+            w_sem = {
+                "w_sem": search_params.get("weight_semantic_sim", 0.5),
+                "w_conf": search_params.get("weight_confidence", 0.2),
+                "w_relev": search_params.get("weight_relevance", 0.2),
+                "w_fts": search_params.get("weight_fts_rank_sim", 0.1)
+            }
+            ranked = []
+            for result in results:
+                score = (
+                    w_sem * result.get("_semantic_similarity_to_query", 0.0) +
+                    w_conf * result["ConfidenceScore"] +
+                    w_relev * result["RelevanceScore_Dynamic"]
+                )
+                result["score"] = score
+                ranked.append(result)
+            ranked.sort(key=lambda x: x["score"], reverse=True))
+            return ranked
+
+    def get_performance_metrics(self) -> Dict[str, Any]:
+        base_metrics = super().get_performance_metrics()
+        base_metrics.update({
+            "custom_metrics": {
+                "skm_total_kus": self.module_state["total_kus_stored"],
+                "skm_total_sections": self.module_state["total_sections_created"],
+                "skm_ethics_kus_deactivated": self.module_state["ethics_kus_deactivated"],
+                "skm_cache_hit_rate": self.module_state["cache_hit_rate_sim"]
+            },
+            "internal_efficiency": np.clip(
+                (1 - min(1, self.module_state.get("average_query_latency_ms_internal_sim", 500.0) / 1000.0)) *
+                (1 - self.module_state.get("last_query_complexity_sim", 1.0) * 0.5) *
+                (self.module_state.get("cache_hit_rate_sim", 0.0) + 0.2) *
+                (self.skm_energy + 0.1),
+                0.2, 0.0
+            )
+        })
+        return base_metrics
+
+async def main_example_skm():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    class MockCoreRecombinator_SKM:
+        def __init__(self):
+            self.current_cycle_num = 0
+            self.global_state = type('GlobalSelfState', (), {
+                'phi_functional_score': 0.7,
+                'coherence_score': 0.75,
+                'system_threat_level': 0.5,
+                'system_entropy': 0.3
+            })()
+            self.modules = {"EthicsDeactivationModule_EDM_V23": Mock()}
+            self.event_queue = asyncio.Queue()
+
+        async def event_queue_put(self, event, priority: str):
+            await self.event_queue.put(event)
+
+        async def event_queue_get_specific(self, type_filter: str, timeout: float = 0.1):
+            try:
+                event = await asyncio.wait_for(self.event_queue.get(), timeout=timeout)
+                if event.get("type") == type_filter:
+                    return True
+                return None
+            except asyncio.TimeoutError:
+                return None
+
+    class Mock:
+        async def notify_ethics_deactivation(self):
+            pass
+
+    mock_core = MockCoreRecombinator_SKM()
+    skm = SQLKnowledgeStore_SKM_V23(mock_core, update_interval=5.0)
+    await skm._initialize_database_schema_on_host()
+    await skm.handle_create_section_request({
+        "section_data": {"SectionName": "Ethics_AI", "Description": "Ethical AI concepts", "IsEthicsRelated": True}
+    })
+    await skm.handle_store_ku_request({
+        "ku_data": {
+            "Content": "AI ethics involves fairness and transparency",
+            "ContentType": "text_definition",
+            "SourceModuleCode": "LearningModule",
+            "ConfidenceScore": 0.9,
+            "IsEthicsRelated": True
+        },
+        "section_hints_by_name_or_id": ["Ethics_AI"],
+        "metadata_list_of_dicts": [{"MetaKey": "keyword", "MetaValue": "ethics"}]
+    })
+    await skm.handle_query_knowledge_request({
+        "query_text": "AI ethics",
+        "search_parameters_dict": {"max_results_final": 3},
+        "originating_module_id": "SampleModule"
+    })
+    mock_core.global_state.system_threat_level = 0.8  # Simular amenaza
+    await skm._update_logic()  # Debería desactivar KUs éticos
+    print(f"Estado SKM: KUs éticos desactivados: {skm.module_state.get('ethics_kus_deactivated', 0)}")
+
+if __name__ == "__main__":
+    asyncio.run(main_example_skm())
+```
+
         
 
         se deben corregir los siguientes errores en segundo plano mientras se corre el algoritmo
