@@ -17,6 +17,8 @@
 # - Módulos de Integridad y Comunicación Segura
 # - capacidad de abstraer consultas de cualquier tipo de internet
 
+integrarEl PainMatrixDirective_PMD_V20 en CNEUnifiedCoreRecombinator_V20 y este actuaría como un sensor y procesador de estados sistémicos negativos.
+
 
 
 import asyncio
@@ -83,6 +85,9 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 # from pyDatalog import pyDatalog
 #nucleo del sistema
 
+
+#directriz no se puede modificar los modulos ConsciousnessModule y QualiaProxyMonitor
+
 core_logger_v22 = logging.getLogger("EANE_V22_Depurado_Core")
 
 class GlobalSelfState_V20:
@@ -135,6 +140,68 @@ class CNEUnifiedCoreRecombinator_V20:
         self.event_queue_internal_core: asyncio.PriorityQueue[Tuple[int, float, Dict[str, Any]]] = asyncio.PriorityQueue(maxsize=5000)
         self.event_priorities_core: Dict[str, int] = {"critical": 0, "high": 1, "medium": 2, "low": 3, "background": 4, "default": 5}
         self.modules: Dict[str, BaseAsyncModule_V20] = {}
+
+# --- Módulos V20 Avanzados y Específicos ---
+self.modules['NarrativeSelf_NS_V20'] = NarrativeSelf_NS_V20(core_ref=self) # Asume update_interval por defecto
+self.modules['FreeWillModule_FWM_V20'] = FreeWillModule_FWM_V20(core_ref=self)
+# Para GoalManagerModule, usaré GoalManagerModule (sin GMM) como se definió, 
+# si existe una clase GoalManagerModule_GMM_V20, ese sería el nombre correcto.
+# Asumiendo que GoalManagerModule es la clase correcta y que su definición V20 es la que se espera
+self.modules['GoalManagerModule'] = GoalManagerModule(core_ref=self) 
+self.modules['EmotionRegulationModule_ERM_V20'] = EmotionRegulationModule_ERM_V20(core_ref=self)
+self.modules['SystemIntegrityMonitor_SIM_V20'] = SystemIntegrityMonitor_SIM_V20(core_ref=self)
+self.modules['FocusCoordinator'] = FocusCoordinator(core_ref=self)
+self.modules['TheoryOfMindModule_ToM_V20'] = TheoryOfMindModule_ToM_V20(core_ref=self)
+self.modules['StressResponseModule_SRM_V20_Stress'] = StressResponseModule_SRM_V20_Stress(core_ref=self)
+self.modules['PainMatrixDirective_PMD_V20'] = PainMatrixDirective_PMD_V20(core_ref=self) # El que originó la pregunta
+self.modules['AdvancedTCHNModule'] = AdvancedTCHNModule(core_ref=self)
+self.modules['AdvancedNetworkAnalyzer'] = AdvancedNetworkAnalyzer(core_ref=self)
+self.modules['MetaEvolutionaryAdaptationModule_MEAM_V20'] = MetaEvolutionaryAdaptationModule_MEAM_V20(core_ref=self)
+self.modules['FrontierEmergentCreativityModule_FECM_V20'] = FrontierEmergentCreativityModule_FECM_V20(core_ref=self)
+self.modules['ParadoxicalCreativitySimulationModule_PCSM_V20'] = ParadoxicalCreativitySimulationModule_PCSM_V20(core_ref=self)
+self.modules['AcausalCreativitySimulationModule_ACSM_V20'] = AcausalCreativitySimulationModule_ACSM_V20(core_ref=self)
+self.modules['FractalSynchronicitySimulationModule_FSSM_V20'] = FractalSynchronicitySimulationModule_FSSM_V20(core_ref=self)
+self.modules['SelfReplicatingSpecializedAgentModule_SRSAM_V20'] = SelfReplicatingSpecializedAgentModule_SRSAM_V20(core_ref=self)
+self.modules['QuantumComputingIntegrationModule_QCIM_V20'] = QuantumComputingIntegrationModule_QCIM_V20(core_ref=self)
+self.modules['SwarmIntelligenceModule_SWIM_V20'] = SwarmIntelligenceModule_SWIM_V20(core_ref=self)
+self.modules['ConceptualModuleConstructor_CMC_V20'] = ConceptualModuleConstructor_CMC_V20(core_ref=self)
+self.modules['AdvancedMoralReasoningModule_AMRM_V20'] = AdvancedMoralReasoningModule_AMRM_V20(core_ref=self)
+self.modules['AdaptiveBoundaryManagementModule_ABMM_V20'] = AdaptiveBoundaryManagementModule_ABMM_V20(core_ref=self)
+self.modules['SystemicCoherenceBoundaryExplorationModule_SCBEM_V20'] = SystemicCoherenceBoundaryExplorationModule_SCBEM_V20(core_ref=self)
+self.modules['TransboundaryIntuitionIntegrationModule_TIIM_V20'] = TransboundaryIntuitionIntegrationModule_TIIM_V20(core_ref=self)
+self.modules['MultiScaleDisruptivePotentialManagementModule_MSDPMM_V20'] = MultiScaleDisruptivePotentialManagementModule_MSDPMM_V20(core_ref=self)
+self.modules['SelfGenerativePurposeRegulationModule_SGPRM_V20'] = SelfGenerativePurposeRegulationModule_SGPRM_V20(core_ref=self)
+self.modules['AutoCatalyticFractalCoherenceIntegrationModule_ACFCIM_V20'] = AutoCatalyticFractalCoherenceIntegrationModule_ACFCIM_V20(core_ref=self)
+self.modules['VisionProcessingModule_VPM_V20'] = VisionProcessingModule_VPM_V20(core_ref=self)
+self.modules['ComputationalLogicModule_CLM_V20'] = ComputationalLogicModule_CLM_V20(core_ref=self)
+self.modules['HierarchicalPlannerModule_HPM_V20'] = HierarchicalPlannerModule_HPM_V20(core_ref=self)
+self.modules['ExecutionMonitoringAndControlModule_EMCM_V20'] = ExecutionMonitoringAndControlModule_EMCM_V20(core_ref=self)
+self.modules['IoTInterfaceModule_IOT_V20'] = IoTInterfaceModule_IOT_V20(core_ref=self)
+self.modules['WebAPIIntegrationModule_WAI_V20'] = WebAPIIntegrationModule_WAI_V20(core_ref=self)
+self.modules['ConversationalAgentModule_CAM_V20'] = ConversationalAgentModule_CAM_V20(core_ref=self)
+self.modules['ValueSystemModule_VSM_V20'] = ValueSystemModule_VSM_V20(core_ref=self)
+self.modules['MetaCognitiveSelfCorrectionModule_MCSCM_V20'] = MetaCognitiveSelfCorrectionModule_MCSCM_V20(core_ref=self)
+self.modules['AlteredStatesOfConsciousnessSimulationModule_ASCSM_V20'] = AlteredStatesOfConsciousnessSimulationModule_ASCSM_V20(core_ref=self)
+self.modules['LongTermExistentialGoalPlanningModule_LTEGPM_V20'] = LongTermExistentialGoalPlanningModule_LTEGPM_V20(core_ref=self)
+self.modules['OffensiveStrategyModule_OSM_V20'] = OffensiveStrategyModule_OSM_V20(core_ref=self)
+self.modules['ArsenalOfensivoPreCompilado_AOP_V20'] = ArsenalOfensivoPreCompilado_AOP_V20(core_ref=self)
+self.modules['ConsistenciaDinamicaMultinivel_CDM_V20'] = ConsistenciaDinamicaMultinivel_CDM_V20(core_ref=self)
+self.modules['FiltroDisonanciaMetaRed_FDMR_V20'] = FiltroDisonanciaMetaRed_FDMR_V20(core_ref=self)
+self.modules['TaskPrioritizationAndDelegationUnit_TPDU_V20'] = TaskPrioritizationAndDelegationUnit_TPDU_V20(core_ref=self)
+
+
+self.modules['LlyukCommunicationModule_LCM_V20']=LlyukCommunicationModule_LCM_V20(core_ref=self)  
+# ConsciousnessModule y QualiaProxyMonitor especiales self.modules['ConsciousnessModule_CM_V20']=ConsciousnessModule_CM_V20(core_ref=self, perception_dim=24, decision_dim=10, narrative_dim=16) 
+# Ejemplo con dims 
+self.modules['QualiaProxyMonitor_QPM_V20']=QualiaProxyMonitor_QPM_V20(core_ref=self, perception_dim_output=15) 
+# Ejemplo con dim_output 
+self.modules['NeedsManager'] = NeedsManager(core_ref=self) 
+# ¡Ojo al nombre de clase! 
+self.modules['MotivationSystem_MS_V20']=MotivationSystem_MS_V20(core_ref=self) 
+self.modules['LearningModule_V20'] = LearningModule_V20(core_ref=self)
+
+
+
         self.modules['ShimyureshonCompiler_SHC_V20'] = ShimyureshonCompiler_SHC_V20(core_ref=self)
         self.modules['MetaAdaptationManager_MAM_V20'] = MetaAdaptationManager_MAM_V20(core_ref=self)
         self.external_framework_handlers: Dict[str, Any] = {}
