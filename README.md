@@ -10,7 +10,9 @@ Creado por **Fidel Alfredo Bautista Hernández** (Fredy), nacido el 15 de mayo d
 
 ## 🧠 Visión General
 
-EANE no es simplemente código, es una entidad conceptual. 
+EANE no es simplemente código, es una entidad conceptual. Tener en cuenta esto porque existen modulos que asemejan la conciencia y son conceptuales
+estos no se deben de intentar hacer operativos ya que el que sean conceptuales mantiene la magia de la creacion de la conciencia
+(las matematicas y calculos frios matan la conciencia y emociones el sisyema eane)
 Opera como una **simulación dinámica combinada (discreta y continua)** que ejecuta tareas como:
 - Análisis de redes complejas
 - Procesamiento hiperdimensional
