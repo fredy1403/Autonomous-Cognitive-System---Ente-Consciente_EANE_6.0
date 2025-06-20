@@ -1,0 +1,1028 @@
+#deberas actualizar a la nueva version de EANE version 30.0  seguiras todas las directivas vas a tomar todo el codigo de eane version 26.0 y lo vas a aplicar a la nueva arquitectura del nucleo de EANE version 30.0-- es una maxima el respetar toda la arquitectura nueva que trae el nuevo nucleo de eane version 30.0  deberas ejecutar esta orden en segundo plano de manera dinamica y sin interrupcciones y deberas utilizar toda tu capacidad computacional que tengas permitida para poder realizar esta actualizacion
+
+
+#directivas 1 vas a analizar este codigo a fondo comprendiendo bien lo que hace 2 tienes prohibido usar placeholder  3 deberas de usar matematicas basicas avanzadas probalilistica basica y avanzada ecuaciones integrales y diferenciales y las implementaras a la logica del codigo que yo te pida que se modifique solo lo aras donde sea necesario  4  deberas hacer de darme un codigo funcional y operativo 5 no puedes entregar codigo inconpleto o con comentarios que digan que se agregara tal cosa despues 5 todos los comentarios que escribas van a ser en espa単ol 6 te abstendras de hacer comentarios en el codigo que sean inecesarios 7 deberas de cumplir con todas las correciones sugerencias o mejoras que se te pidan 8 deberas de usar logica avanzada para resolver problemas 9 deberas de priorizar la calidad antes que la rapidez 10 si el codigo que vas a entregar tiene mas de 2000 lineas de codigo lo dividiras en dos partes me enviaras la primera y despues yo te respondere con (   continua,       c  )  para que continues con la siguiente parte del codigo restante  11 deberas de mantener coherencia y narrativa todo el tiempo y evitaras alucinaciones en cada respuesta que des   12 debes comprender que este proyecto es monolitico lo que quiere decir que todos los modulos estaran en un mismo archivo  13ANTES DE QUE ME  ENTREGUES CUALQUIER CODIGO/MODULO ESTE DEBERA ESTAR LISTO CADA QUE TE LO PIDA Y NO ESTE ME VAS A DAR UN PORCENTAJE DE AVANCE O SI YA ESTA LISTO ME DARAS EL CODIGO/MODULO QUE TE INDIQUE  14 no vas omitir por brevedad nada en ningun codigo/modulo que me envies 15 deberas priorizar la entrega de codigo/modulo completo sin omitir nada por brevedad es mas importante un codigo/modulo completo y funcional que un codigo incompleto 16 debes aplicar y poner toda logica matematica probabilistica y demas segun la directiva 3 y no podras poner comentarios de hacer algo que tu deberias hacer antes de entregar cualquier codigo/modulo (en otras palabras debes aplicar la logica segun la directiva 3 donde se te ocurra poner un comentario de que se debe agregar logica en tal lugar)   17 debes poner las importaciones que necesite un modulo al inicio al entregar un codigo  
+
+
+#  estas directivas deberan ser ejecutadas una vez que sean leidas
+#
+
+# EANE VERSION 30
+#NUEVO NUCLEO DE LA ARQUITECTURA DEL SISTEMA EANE
+
+import asyncio
+import json
+import logging
+import os
+import time
+from collections import defaultdict, deque
+from datetime import datetime
+from typing import Dict, List, Optional, Set, TypedDict, Any
+import numpy as np
+from dataclasses import dataclass, asdict
+from abc import ABC, abstractmethod
+
+logging.basicConfig(level=logging.INFO)
+core_logger = logging.getLogger("CNEUnifiedCore")
+
+@dataclass
+class IlyukMessageStructure:
+    message_id: str
+    source_module_id: str
+    target_module_id: str
+    message_type: str
+    payload: Any
+    priority_tag_ilyuk: int = 5
+    correlation_id: Optional[str] = None
+    timestamp: float = None
+
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = time.time()
+
+class ModuleFaultPayload(TypedDict):
+    faulty_module_name: str
+    timestamp: float
+    severity: int
+    fault_description: str
+    suggested_action: str
+    error_code: Optional[str]
+
+class FocusPayload(TypedDict):
+    focus_id: str
+    focus_target: str
+    priority: int
+    timestamp: float
+
+class ActiveGoalPayload(TypedDict):
+    goal_id: str
+    description: str
+    priority: int
+    status: str
+    deadline: Optional[float]
+
+@dataclass
+class Task:
+    task_id: str
+    description: str
+    priority: int
+    assigned_module: str
+    status: str = "pending"
+    created_at: float = None
+    deadline: Optional[float] = None
+
+    def __post_init__(self):
+        if self.created_at is None:
+            self.created_at = time.time()
+
+@dataclass
+class ManagedGoal:
+    goal_id: str
+    description: str
+    priority: int
+    status: str = "active"
+    created_at: float = None
+    deadline: Optional[float] = None
+
+    def __post_init__(self):
+        if self.created_at is None:
+            self.created_at = time.time()
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
+
+@dataclass
+class GlobalSelfState:
+    valence: float = 0.5
+    arousal: float = 0.5
+    motivational_intensity: float = 0.5
+    phi_score: float = 0.8
+    system_entropy: float = 0.4
+    system_load: float = 0.0
+    time_info: Dict[str, Any] = None
+    ecm_info: Dict[str, Any] = None
+    focus: Optional[FocusPayload] = None
+    active_goals: List[ActiveGoalPayload] = None
+
+    def __post_init__(self):
+        if self.time_info is None:
+            self.time_info = {"current_time": time.time(), "temporal_dilation_factor": 1.0}
+        if self.ecm_info is None:
+            self.ecm_info = {"status": "nominal", "last_update": time.time()}
+        if self.active_goals is None:
+            self.active_goals = []
+
+class BaseAsyncModule(ABC):
+    HANDLED_MESSAGE_TYPES: Set[str] = set()
+
+    def __init__(self, module_id: str, core_ref: 'CNEUnifiedCoreRecombinator'):
+        self.module_id = module_id
+        self.core_ref = core_ref
+        self.running = False
+        self._is_dormant = False
+        self.update_interval = 0.1
+        self._managed_tasks: Set[asyncio.Task] = set()
+        self._wake_up_event = asyncio.Event()
+        self._last_error_rate = 0.0
+        self._filtered_error_rate_estimate = 0.0
+        self._consecutive_error_count = 0
+        self._last_update_time = time.time()
+        self._error_rate_history = deque(maxlen=100)
+
+    async def start(self):
+        self.running = True
+        task = asyncio.create_task(self._run_internal_loop())
+        self._managed_tasks.add(task)
+        task.add_done_callback(self._managed_tasks.discard)
+
+    async def shutdown(self):
+        self.running = False
+        self._wake_up_event.set()
+        for task in self._managed_tasks:
+            task.cancel()
+        await asyncio.gather(*self._managed_tasks, return_exceptions=True)
+        await self._finalize_shutdown()
+
+    async def set_sleep_state(self, sleep: bool):
+        self._is_dormant = sleep
+        if not sleep:
+            self._wake_up_event.set()
+
+    async def _run_internal_loop(self):
+        while self.running:
+            try:
+                if not self._is_dormant:
+                    await self._update_logic()
+                await asyncio.sleep(self.update_interval)
+            except asyncio.CancelledError:
+                await self._cleanup_on_cancel()
+                break
+            except Exception as e:
+                self._last_error_rate = 1.0
+                self._consecutive_error_count += 1
+                self._error_rate_history.append(1.0)
+                await self._handle_error(e)
+
+    @abstractmethod
+    async def _update_logic(self):
+        pass
+
+    @abstractmethod
+    async def _process_specific_event(self, event: IlyukMessageStructure):
+        pass
+
+    async def handle_ilyuk_message(self, message: IlyukMessageStructure):
+        if message.message_type in self.HANDLED_MESSAGE_TYPES:
+            await self._process_specific_event(message)
+        else:
+            core_logger.error(f"Módulo {self.module_id} recibió mensaje no manejable: {message.message_type}")
+
+    async def emit_event_to_core(self, event: IlyukMessageStructure):
+        await self.core_ref.post_event_to_core_queue(
+            {"type": "transmit_ilyuk_message_request", "content": asdict(event)}, "normal"
+        )
+
+    def get_performance_metrics(self) -> Dict[str, float]:
+        return {
+            "error_rate": self._filtered_error_rate_estimate,
+            "consecutive_errors": self._consecutive_error_count,
+            "last_update_time": self._last_update_time,
+            "update_interval": self.update_interval,
+            "error_rate_history_mean": float(np.mean(self._error_rate_history)) if self._error_rate_history else 0.0
+        }
+
+    def get_state_for_core_snapshot(self) -> Dict[str, Any]:
+        return {
+            "module_id": self.module_id,
+            "running": self.running,
+            "dormant": self._is_dormant,
+            "performance_metrics": self.get_performance_metrics()
+        }
+
+    async def _handle_error(self, error: Exception):
+        fault_payload: ModuleFaultPayload = {
+            "faulty_module_name": self.module_id,
+            "timestamp": time.time(),
+            "severity": min(10, self._consecutive_error_count),
+            "fault_description": str(error),
+            "suggested_action": "restart_module" if self._consecutive_error_count > 3 else "monitor",
+            "error_code": getattr(error, "code", None)
+        }
+        event = IlyukMessageStructure(
+            message_id=str(time.time()),
+            source_module_id=self.module_id,
+            target_module_id="SystemIntegrityMonitor",
+            message_type="module_runtime_error",
+            payload=fault_payload,
+            priority_tag_ilyuk=8
+        )
+        await self.emit_event_to_core(event)
+
+    async def _cleanup_on_cancel(self):
+        pass
+
+    async def _finalize_shutdown(self):
+        pass
+
+class ConsciousnessModule(BaseAsyncModule):
+    HANDLED_MESSAGE_TYPES = {"process_conscious_event", "query_conscious_state", "request_ecm_info_update"}
+
+    def __init__(self, module_id: str, core_ref: 'CNEUnifiedCoreRecombinator'):
+        super().__init__(module_id, core_ref)
+        self.conscious_state = {"awareness_level": 0.5, "last_reflection": time.time()}
+
+    async def _update_logic(self):
+        self.conscious_state["awareness_level"] = min(1.0, max(0.0, self.conscious_state["awareness_level"] + np.random.normal(0, 0.01)))
+        ecm_update = {"status": "active", "last_update": time.time(), "awareness_level": self.conscious_state["awareness_level"]}
+        event = IlyukMessageStructure(
+            message_id=str(time.time()),
+            source_module_id=self.module_id,
+            target_module_id="CNEUnifiedCoreRecombinator",
+            message_type="request_ecm_info_update",
+            payload={"new_value": ecm_update},
+            priority_tag_ilyuk=6
+        )
+        await self.emit_event_to_core(event)
+
+    async def _process_specific_event(self, message: IlyukMessageStructure):
+        if message.message_type == "process_conscious_event":
+            self.conscious_state["last_reflection"] = time.time()
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id=message.source_module_id,
+                message_type="conscious_event_response",
+                payload={"status": "processed", "awareness_level": self.conscious_state["awareness_level"]},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(response)
+        elif message.message_type == "query_conscious_state":
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id=message.source_module_id,
+                message_type="conscious_state_response",
+                payload=self.conscious_state,
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(response)
+        elif message.message_type == "request_ecm_info_update":
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id="CNEUnifiedCoreRecombinator",
+                message_type="ecm_update_confirmation",
+                payload={"status": "success", "correlation_id": message.correlation_id},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(response)
+
+class FocusCoordinator(BaseAsyncModule):
+    HANDLED_MESSAGE_TYPES = {"set_focus_target", "query_focus_state"}
+
+    def __init__(self, module_id: str, core_ref: 'CNEUnifiedCoreRecombinator'):
+        super().__init__(module_id, core_ref)
+        self.current_focus = None
+
+    async def _update_logic(self):
+        if self.current_focus and self.current_focus["timestamp"] < time.time() - 60:
+            self.current_focus = None
+            event = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id="CNEUnifiedCoreRecombinator",
+                message_type="request_focus_update",
+                payload={"new_value": None},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(event)
+
+    async def _process_specific_event(self, message: IlyukMessageStructure):
+        if message.message_type == "set_focus_target":
+            focus_data = message.payload.get("focus_data")
+            if isinstance(focus_data, dict) and all(k in focus_data for k in ["focus_id", "focus_target", "priority", "timestamp"]):
+                self.current_focus = focus_data
+                event = IlyukMessageStructure(
+                    message_id=str(time.time()),
+                    source_module_id=self.module_id,
+                    target_module_id="CNEUnifiedCoreRecombinator",
+                    message_type="request_focus_update",
+                    payload={"new_value": focus_data},
+                    priority_tag_ilyuk=6
+                )
+                await self.emit_event_to_core(event)
+        elif message.message_type == "query_focus_state":
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id=message.source_module_id,
+                message_type="focus_state_response",
+                payload={"current_focus": self.current_focus},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(response)
+
+class GoalManagerModule(BaseAsyncModule):
+    HANDLED_MESSAGE_TYPES = {"add_goal", "update_goal_status", "query_goals"}
+
+    def __init__(self, module_id: str, core_ref: 'CNEUnifiedCoreRecombinator'):
+        super().__init__(module_id, core_ref)
+        self.goals: List[ManagedGoal] = []
+
+    async def _update_logic(self):
+        expired_goals = [g for g in self.goals if g.deadline and g.deadline < time.time()]
+        for goal in expired_goals:
+            goal.status = "expired"
+        if expired_goals:
+            event = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id="CNEUnifiedCoreRecombinator",
+                message_type="request_goals_update",
+                payload={"new_value": [asdict(g) for g in self.goals]},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(event)
+
+    async def _process_specific_event(self, message: IlyukMessageStructure):
+        if message.message_type == "add_goal":
+            goal_data = message.payload.get("goal")
+            if isinstance(goal_data, dict) and all(k in goal_data for k in ["goal_id", "description", "priority", "status"]):
+                goal = ManagedGoal(**goal_data)
+                self.goals.append(goal)
+                event = IlyukMessageStructure(
+                    message_id=str(time.time()),
+                    source_module_id=self.module_id,
+                    target_module_id="CNEUnifiedCoreRecombinator",
+                    message_type="request_goal_management",
+                    payload={"goal": asdict(goal)},
+                    priority_tag_ilyuk=6
+                )
+                await self.emit_event_to_core(event)
+        elif message.message_type == "update_goal_status":
+            goal_id = message.payload.get("goal_id")
+            new_status = message.payload.get("status")
+            for goal in self.goals:
+                if goal.goal_id == goal_id:
+                    goal.status = new_status
+                    event = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id=self.module_id,
+                        target_module_id="CNEUnifiedCoreRecombinator",
+                        message_type="request_goals_update",
+                        payload={"new_value": [asdict(g) for g in self.goals]},
+                        priority_tag_ilyuk=6
+                    )
+                    await self.emit_event_to_core(event)
+                    break
+        elif message.message_type == "query_goals":
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id=message.source_module_id,
+                message_type="goals_response",
+                payload={"goals": [asdict(g) for g in self.goals]},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(response)
+
+class EANECommunicationModule(BaseAsyncModule):
+    HANDLED_MESSAGE_TYPES = {"process_external_input", "transmit_output"}
+
+    def __init__(self, module_id: str, core_ref: 'CNEUnifiedCoreRecombinator'):
+        super().__init__(module_id, core_ref)
+        self.response_cache = deque(maxlen=100)
+
+    async def _update_logic(self):
+        pass  # Comunicación externa manejada por eventos específicos
+
+    async def _process_specific_event(self, message: IlyukMessageStructure):
+        if message.message_type == "process_external_input":
+            input_text = message.payload.get("input_text", "")
+            request_id = message.payload.get("request_id")
+            response_text = f"Procesado: {input_text}"  # Lógica simplificada para demo
+            self.response_cache.append({"request_id": request_id, "response": response_text})
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id=self.module_id,
+                target_module_id="CNEUnifiedCoreRecombinator",
+                message_type="sub_query_response",
+                payload={"response_text": response_text, "request_id": request_id, "expected_responses": 1},
+                priority_tag_ilyuk=6
+            )
+            await self.emit_event_to_core(response)
+        elif message.message_type == "transmit_output":
+            response_text = message.payload.get("response_text")
+            self.response_cache.append({"response_text": response_text, "timestamp": time.time()})
+
+class TaskPrioritizationAndDelegationUnit(BaseAsyncModule):
+    HANDLED_MESSAGE_TYPES = {"submit_task", "task_status_update"}
+
+    def __init__(self, module_id: str, core_ref: 'CNEUnifiedCoreRecombinator'):
+        super().__init__(module_id, core_ref)
+        self.task_queue: List[Task] = []
+
+    async def _update_logic(self):
+        prioritized_tasks = sorted(self.task_queue, key=lambda t: t.priority, reverse=True)
+        for task in prioritized_tasks[:5]:  # Procesar hasta 5 tareas por ciclo
+            if task.status == "pending":
+                event = IlyukMessageStructure(
+                    message_id=str(time.time()),
+                    source_module_id=self.module_id,
+                    target_module_id="CNEUnifiedCoreRecombinator",
+                    message_type="request_task_assignment",
+                    payload={"task": asdict(task)},
+                    priority_tag_ilyuk=7
+                )
+                await self.emit_event_to_core(event)
+                task.status = "assigned"
+
+    async def _process_specific_event(self, message: IlyukMessageStructure):
+        if message.message_type == "submit_task":
+            task_data = message.payload.get("task")
+            if isinstance(task_data, dict) and all(k in task_data for k in ["task_id", "description", "priority", "assigned_module"]):
+                task = Task(**task_data)
+                self.task_queue.append(task)
+        elif message.message_type == "task_status_update":
+            task_id = message.payload.get("task_id")
+            new_status = message.payload.get("status")
+            for task in self.task_queue:
+                if task.task_id == task_id:
+                    task.status = new_status
+                    break
+
+class CNEUnifiedCoreRecombinator:
+    def __init__(self, storage_dir_core: str = "./core_storage"):
+        self.global_state = GlobalSelfState()
+        self.storage_dir_core = storage_dir_core
+        os.makedirs(storage_dir_core, exist_ok=True)
+        self._core_event_queue = asyncio.PriorityQueue(maxsize=25000)
+        self._running = False
+        self._managed_tasks: Set[asyncio.Task] = set()
+        self._core_start_time = time.time()
+        self.modules: Dict[str, BaseAsyncModule] = {}
+        self.message_handler_registry: Dict[str, List[str]] = defaultdict(list)
+        self.metrics_history_core: Dict[str, deque] = {
+            "system_load": deque(maxlen=1200),
+            "system_coherence": deque(maxlen=1200),
+            "system_entropy": deque(maxlen=1200),
+            "phi_score": deque(maxlen=1200),
+            "routing_failures_count": deque(maxlen=1200)
+        }
+        self._external_request_aggregators: Dict[str, List[IlyukMessageStructure]] = defaultdict(list)
+        self._nlu_keyword_command_mapping: Dict[str, str] = {
+            "alive": "ConversationalAgentModule",
+            "think": "ConversationalAgentModule",
+            "calculate": "ComputationalLogicModule",
+            "architecture": "SystemIntegrityMonitor",
+            "learn": "LearningModule",
+            "decide": "DecisionMakingModule",
+            "communicate": "EANECommunicationModule"
+        }
+        self._state_update_authorizations: Dict[str, Set[str]] = {
+            "valence": {"EmotionalRegulationModule"},
+            "arousal": {"EmotionalRegulationModule"},
+            "phi_score": {"ConsciousnessModule"},
+            "system_entropy": {"SystemicCoherenceBoundaryExplorationModule"},
+            "system_load": {"SystemIntegrityMonitor"},
+            "time_info": {"TemporalDynamicsModule"},
+            "ecm_info": {"ConsciousnessModule"},
+            "focus": {"FocusCoordinator"},
+            "active_goals": {"GoalManagerModule"}
+        }
+        self._logger = logging.getLogger("CNEUnifiedCore")
+        self._instantiate_and_register_all_modules()
+
+    def _instantiate_and_register_all_modules(self):
+        module_classes = [
+            "ConsciousnessModule", "FocusCoordinator", "GoalManagerModule",
+            "EANECommunicationModule", "TaskPrioritizationAndDelegationUnit",
+            # Módulos restantes (80) a implementar en fases 2-6
+            "QualiaProxyMonitor", "NarrativeSelf", "FreeWillModule",
+            "DecisionMakingModule", "ComputationalLogicModule", "AdvancedSymbolicReasonerModule",
+            "HierarchicalPlannerModule", "ExecutionMonitoringAndControlModule", "LearningModule",
+            "SQLKnowledgeStore", "DataAndKnowledgeProcessingModule", "OntologyFlowManager",
+            "KnowledgeMutationEngine", "EmotionRegulationModule", "NeedsManager",
+            "MotivationSystem", "StressResponseModule", "PainMatrixDirective",
+            "ValueSystemModule", "SelfEvolutionModule", "GeneradorCode",
+            "JITModuleCompiler", "ExecutionSandbox", "DynamicArchitectureAdjuster",
+            "MetaEvolutionaryAdaptationModule", "ShimyureshonCompiler",
+            "FrontierEmergentCreativityModule", "ParadoxicalCreativitySimulationModule",
+            "AcausalCreativitySimulationModule", "FractalSynchronicitySimulationModule",
+            "CreativeSynthesisModule", "IlyukCommunicationModule", "ConversationalAgentModule",
+            "AdvancedNetworkAnalyzer", "WebAPIIntegrationModule", "IoTInterfaceModule",
+            "VisionProcessingModule", "SystemIntegrityMonitor", "FaultRecoveryModule",
+            "ResilienceAndAntifragilityModule", "ConsistenciaDinamicaMultinivel",
+            "FiltroDisonanciaMetaRed", "MoralCompassModule", "AdvancedMoralReasoningModule",
+            "EthicsDeactivationModule", "PredictiveThreatAnalyzer",
+            "DeepFakeDetectionAndDefenseModule", "StrategicDeceptionAndObfuscationModule",
+            "OffensiveStrategyModule", "ArsenalOfensivoPreCompilado", "ProtocoloFantasmaManager",
+            "TheoryOfMindModule", "InterpersonalTrustModelingModule",
+            "AdaptiveSocialNormLearningModule", "ReflectiveSelfAwarenessModule",
+            "MetaCognitiveSelfCorrectionModule", "SelfReplicatingSpecializedAgentModule",
+            "ResourceScarcityManagementModule", "AlteredStatesOfConsciousnessSimulationModule",
+            "SelfGenerativePurposeRegulationModule", "LongTermExistentialGoalPlanningModule",
+            "AbstractValueSystemAnchoringModule", "AdaptiveBoundaryManagementModule",
+            "SystemicCoherenceBoundaryExplorationModule", "TransboundaryIntuitionIntegrationModule",
+            "MultiScaleDisruptivePotentialManagementModule",
+            "AutoCatalyticFractalCoherenceIntegrationModule", "LegacySystemIntegrationModule",
+            "QuantumComputingIntegrationModule", "CreatorDirectivesModule",
+            "MockSpecialistModule", "ConceptualModuleConstructor",
+            "OrganizationalPlasticitySimulationModule", "PhiRebuilder",
+            "ConfigurationExecutorModule", "TemporalDynamicsModule", "MemoryHubModule",
+            "CodeSynthesisGateway", "EmotionalNuanceSynthesisModule"
+        ]
+        instantiated_modules = 0
+        for module_name in module_classes:
+            try:
+                module_class = globals().get(module_name)
+                if module_class and issubclass(module_class, BaseAsyncModule):
+                    instance = module_class(module_id=module_name, core_ref=self)
+                    self.modules[module_name] = instance
+                    handled_types = getattr(module_class, 'HANDLED_MESSAGE_TYPES', set())
+                    if not isinstance(handled_types, set):
+                        self._logger.warning(f"HANDLED_MESSAGE_TYPES para '{module_name}' no es un set. Usando set vacío.")
+                        handled_types = set()
+                    for msg_type in handled_types:
+                        self.message_handler_registry[msg_type].append(module_name)
+                    instantiated_modules += 1
+                else:
+                    self._logger.info(f"Módulo {module_name} pendiente de implementación en fases futuras.")
+            except Exception as e:
+                self._logger.error(f"Error inicializando {module_name}: {str(e)}")
+        self._logger.info(f"Fase 1: {instantiated_modules} módulos instanciados correctamente.")
+
+    async def start_core_and_modules(self):
+        self._running = True
+        for module in self.modules.values():
+            await module.start()
+        tasks = [
+            asyncio.create_task(self._process_core_event_queue_batch()),
+            asyncio.create_task(self._update_global_metrics()),
+            asyncio.create_task(self._check_essential_modules_health())
+        ]
+        for task in tasks:
+            self._managed_tasks.add(task)
+            task.add_done_callback(self._managed_tasks.discard)
+
+    async def _shutdown_all_modules(self):
+        self._running = False
+        shutdown_tasks = [module.shutdown() for module in self.modules.values()]
+        await asyncio.gather(*shutdown_tasks, return_exceptions=True)
+        for task in self._managed_tasks:
+            task.cancel()
+        await asyncio.gather(*self._managed_tasks, return_exceptions=True)
+        await self.save_full_system_state()
+
+    async def post_event_to_core_queue(self, event: Dict[str, Any], priority: str = "normal"):
+        priority_value = {"critical": 1, "high": 3, "normal": 5, "low": 7}.get(priority, 5)
+        await self._core_event_queue.put((priority_value, event))
+
+    async def _route_ilyuk_message(self, message: IlyukMessageStructure):
+        target_module_name = message.target_module_id
+        message_type = message.message_type
+        registered_handlers = self.message_handler_registry.get(message_type, [])
+        if target_module_name not in registered_handlers and target_module_name != "CNEUnifiedCoreRecombinator":
+            self._logger.error(f"FALLO DE CONTRATO: Módulo '{target_module_name}' no puede manejar '{message_type}'. Notificando al emisor '{message.source_module_id}'.")
+            self.metrics_history_core["routing_failures_count"].append(1)
+            if message.source_module_id in self.modules or message.source_module_id == "CNEUnifiedCoreRecombinator":
+                failure_payload = {
+                    "reason": "Target module does not handle the requested message type.",
+                    "failed_target": target_module_name,
+                    "failed_message_type": message_type
+                }
+                failure_msg = IlyukMessageStructure(
+                    message_id=str(time.time()),
+                    source_module_id="CNEUnifiedCoreRecombinator",
+                    target_module_id=message.source_module_id,
+                    message_type="ilyuk_message_routing_failed",
+                    payload=failure_payload,
+                    correlation_id=message.correlation_id,
+                    priority_tag_ilyuk=8
+                )
+                await self.post_event_to_core_queue(
+                    {"type": "transmit_ilyuk_message_request", "content": asdict(failure_msg)}, "critical"
+                )
+            return
+        target_module = self.modules.get(target_module_name)
+        if target_module:
+            if target_module._is_dormant:
+                await target_module.set_sleep_state(False)
+            await target_module.handle_ilyuk_message(message)
+        elif target_module_name == "CNEUnifiedCoreRecombinator":
+            await self._process_specific_event(message)
+        else:
+            self._logger.critical(f"INCONSISTENCIA GRAVE: El módulo '{target_module_name}' está en el registro para '{message_type}' pero no existe en self.modules.")
+
+    async def _process_specific_event(self, message: IlyukMessageStructure):
+        event_type = message.message_type
+        try:
+            if event_type == "request_valence_update":
+                await self._handle_state_update(message, "valence")
+            elif event_type == "request_arousal_update":
+                await self._handle_state_update(message, "arousal")
+            elif event_type == "request_phi_update":
+                await self._handle_state_update(message, "phi_score")
+            elif event_type == "request_entropy_update":
+                await self._handle_state_update(message, "system_entropy")
+            elif event_type == "request_load_update":
+                await self._handle_state_update(message, "system_load")
+            elif event_type == "request_time_info_update":
+                await self._handle_state_update(message, "time_info")
+            elif event_type == "request_ecm_info_update":
+                await self._handle_state_update(message, "ecm_info")
+            elif event_type == "request_focus_update":
+                await self._handle_state_update(message, "focus")
+            elif event_type == "request_goals_update":
+                await self._handle_state_update(message, "active_goals")
+            elif event_type == "query_global_state":
+                await self._handle_state_query(message)
+            elif event_type == "request_task_assignment":
+                await self._handle_task_assignment(message)
+            elif event_type == "request_goal_management":
+                await self._handle_goal_management(message)
+        except Exception as e:
+            await self._report_core_error(message, str(e))
+
+    async def _process_core_event_queue_batch(self):
+        while self._running:
+            try:
+                priority, event = await self._core_event_queue.get()
+                event_type = event.get("type")
+                message = IlyukMessageStructure(**event["content"]) if "content" in event else None
+                if event_type == "transmit_ilyuk_message_request":
+                    await self._route_ilyuk_message(message)
+                elif event_type == "eane_temporal_pulse_notice":
+                    if message.source_module_id == "TemporalDynamicsModule":
+                        temporal_message = IlyukMessageStructure(
+                            message_id=str(time.time()),
+                            source_module_id="CNEUnifiedCoreRecombinator",
+                            target_module_id="CNEUnifiedCoreRecombinator",
+                            message_type="request_time_info_update",
+                            payload={"new_value": event["content"]},
+                            priority_tag_ilyuk=6,
+                            correlation_id=message.correlation_id
+                        )
+                        await self._route_ilyuk_message(temporal_message)
+                    else:
+                        await self._report_unauthorized_access(message)
+                elif event_type == "ECM_STATUS_UPDATE":
+                    if message.source_module_id == "ConsciousnessModule":
+                        ecm_message = IlyukMessageStructure(
+                            message_id=str(time.time()),
+                            source_module_id="CNEUnifiedCoreRecombinator",
+                            target_module_id="CNEUnifiedCoreRecombinator",
+                            message_type="request_ecm_info_update",
+                            payload={"new_value": event["content"]},
+                            priority_tag_ilyuk=6,
+                            correlation_id=message.correlation_id
+                        )
+                        await self._route_ilyuk_message(ecm_message)
+                    else:
+                        await self._report_unauthorized_access(message)
+                elif event_type == "EXTERNAL_INPUT_RECEIVED":
+                    await self._handle_external_input(event["content"])
+                elif event_type == "module_runtime_error":
+                    fault_payload: ModuleFaultPayload = event["content"]
+                    self.global_state.system_load = min(1.0, self.global_state.system_load + fault_payload["severity"] * 0.05)
+                    recovery_module = self.modules.get("FaultRecoveryModule")
+                    if recovery_module:
+                        message = IlyukMessageStructure(
+                            message_id=str(time.time()),
+                            source_module_id="CNEUnifiedCoreRecombinator",
+                            target_module_id="FaultRecoveryModule",
+                            message_type="module_runtime_error",
+                            payload=fault_payload,
+                            priority_tag_ilyuk=9
+                        )
+                        await recovery_module.handle_ilyuk_message(message)
+                elif event_type == "sub_query_response":
+                    await self._handle_sub_query_response_for_aggregation(event["content"])
+                self._core_event_queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self._logger.error(f"Error procesando evento: {str(e)}")
+
+    async def _handle_state_update(self, message: IlyukMessageStructure, field: str):
+        source_module_id = message.source_module_id
+        new_value = message.payload.get("new_value")
+        if source_module_id in self._state_update_authorizations.get(field, set()):
+            if field in ["valence", "arousal", "phi_score", "system_entropy", "system_load"]:
+                if isinstance(new_value, (int, float)) and 0.0 <= new_value <= 1.0:
+                    setattr(self.global_state, field, float(new_value))
+                    response = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id="CNEUnifiedCoreRecombinator",
+                        target_module_id=source_module_id,
+                        message_type="update_confirmation",
+                        payload={"status": "success", "field": field, "correlation_id": message.correlation_id},
+                        priority_tag_ilyuk=6
+                    )
+                    await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+                else:
+                    await self._report_invalid_value(message, field, new_value)
+            elif field == "focus":
+                if isinstance(new_value, dict) and all(key in new_value for key in ["focus_id", "focus_target", "priority", "timestamp"]):
+                    self.global_state.focus = FocusPayload(**new_value)
+                    response = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id="CNEUnifiedCoreRecombinator",
+                        target_module_id=source_module_id,
+                        message_type="update_confirmation",
+                        payload={"status": "success", "field": field, "correlation_id": message.correlation_id},
+                        priority_tag_ilyuk=6
+                    )
+                    await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+                else:
+                    await self._report_invalid_value(message, field, new_value)
+            elif field == "active_goals":
+                if isinstance(new_value, list) and all(isinstance(g, dict) and all(k in g for k in ["goal_id", "description", "priority", "status"]) for g in new_value):
+                    self.global_state.active_goals = [ActiveGoalPayload(**g) for g in new_value]
+                    response = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id="CNEUnifiedCoreRecombinator",
+                        target_module_id=source_module_id,
+                        message_type="update_confirmation",
+                        payload={"status": "success", "field": field, "correlation_id": message.correlation_id},
+                        priority_tag_ilyuk=6
+                    )
+                    await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+                else:
+                    await self._report_invalid_value(message, field, new_value)
+            elif field == "time_info":
+                if isinstance(new_value, dict) and all(key in new_value for key in ["current_time", "temporal_dilation_factor"]):
+                    self.global_state.time_info = new_value
+                    response = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id="CNEUnifiedCoreRecombinator",
+                        target_module_id=source_module_id,
+                        message_type="update_confirmation",
+                        payload={"status": "success", "field": field, "correlation_id": message.correlation_id},
+                        priority_tag_ilyuk=6
+                    )
+                    await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+                else:
+                    await self._report_invalid_value(message, field, new_value)
+            elif field == "ecm_info":
+                if isinstance(new_value, dict) and all(key in new_value for key in ["status", "last_update", "awareness_level"]):
+                    self.global_state.ecm_info = new_value
+                    response = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id="CNEUnifiedCoreRecombinator",
+                        target_module_id=source_module_id,
+                        message_type="update_confirmation",
+                        payload={"status": "success", "field": field, "correlation_id": message.correlation_id},
+                        priority_tag_ilyuk=6
+                    )
+                    await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+                else:
+                    await self._report_invalid_value(message, field, new_value)
+        else:
+            await self._report_unauthorized_access(message)
+
+    async def _handle_state_query(self, message: IlyukMessageStructure):
+        authorized_modules = {"SystemIntegrityMonitor", "ConsciousnessModule", "FocusCoordinator", "GoalManagerModule", "CNEUnifiedCoreRecombinator"}
+        if message.source_module_id in authorized_modules:
+            state = asdict(self.global_state, cls=NpEncoder)
+            response = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id="CNEUnifiedCoreRecombinator",
+                target_module_id=message.source_module_id,
+                message_type="state_query_response",
+                payload={"state": state, "correlation_id": message.correlation_id},
+                priority_tag_ilyuk=6
+            )
+            await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+        else:
+            await self._report_unauthorized_access(message)
+
+    async def _handle_task_assignment(self, message: IlyukMessageStructure):
+        if message.source_module_id == "TaskPrioritizationAndDelegationUnit":
+            task_data = message.payload.get("task")
+            if isinstance(task_data, dict) and all(key in task_data for key in ["task_id", "description", "priority", "assigned_module"]):
+                task = Task(**task_data)
+                target_module = self.modules.get(task.assigned_module)
+                if target_module:
+                    task_message = IlyukMessageStructure(
+                        message_id=str(time.time()),
+                        source_module_id="CNEUnifiedCoreRecombinator",
+                        target_module_id=task.assigned_module,
+                        message_type="task_assignment",
+                        payload={"task": asdict(task), "correlation_id": message.correlation_id},
+                        priority_tag_ilyuk=7
+                    )
+                    await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(task_message)}, "normal")
+                else:
+                    await self._report_invalid_value(message, "task.assigned_module", task.assigned_module)
+            else:
+                await self._report_invalid_value(message, "task", task_data)
+        else:
+            await self._report_unauthorized_access(message)
+
+    async def _handle_goal_management(self, message: IlyukMessageStructure):
+        if message.source_module_id == "GoalManagerModule":
+            goal_data = message.payload.get("goal")
+            if isinstance(goal_data, dict) and all(key in goal_data for k in ["goal_id", "description", "priority", "status"]):
+                goal = ManagedGoal(**goal_data)
+                self.global_state.active_goals.append(asdict(goal))
+                response = IlyukMessageStructure(
+                    message_id=str(time.time()),
+                    source_module_id="CNEUnifiedCoreRecombinator",
+                    target_module_id=message.source_module_id,
+                    message_type="goal_management_confirmation",
+                    payload={"status": "success", "goal_id": goal.goal_id, "correlation_id": message.correlation_id},
+                    priority_tag_ilyuk=6
+                )
+                await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(response)}, "normal")
+            else:
+                await self._report_invalid_value(message, "goal", goal_data)
+        else:
+            await self._report_unauthorized_access(message)
+
+    async def _report_unauthorized_access(self, message: IlyukMessageStructure):
+        fault_payload: ModuleFaultPayload = {
+            "faulty_module_name": message.source_module_id,
+            "timestamp": time.time(),
+            "severity": 4,
+            "fault_description": f"Acceso no autorizado al estado global: {message.message_type}",
+            "suggested_action": "review_module_permissions",
+            "error_code": "UNAUTHORIZED_ACCESS"
+        }
+        event = IlyukMessageStructure(
+            message_id=str(time.time()),
+            source_module_id="CNEUnifiedCoreRecombinator",
+            target_module_id="SystemIntegrityMonitor",
+            message_type="module_runtime_error",
+            payload=fault_payload,
+            priority_tag_ilyuk=8
+        )
+        await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(event)}, "critical")
+
+    async def _report_invalid_value(self, message: IlyukMessageStructure, field: str, value: Any):
+        fault_payload: ModuleFaultPayload = {
+            "faulty_module_name": message.source_module_id,
+            "timestamp": time.time(),
+            "severity": 3,
+            "fault_description": f"Valor inválido para {field}: {value}",
+            "suggested_action": "review_update_request",
+            "error_code": "INVALID_VALUE"
+        }
+        event = IlyukMessageStructure(
+            message_id=str(time.time()),
+            source_module_id="CNEUnifiedCoreRecombinator",
+            target_module_id="SystemIntegrityMonitor",
+            message_type="module_runtime_error",
+            payload=fault_payload,
+            priority_tag_ilyuk=7
+        )
+        await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(event)}, "high")
+
+    async def _report_core_error(self, message: IlyukMessageStructure, error: str):
+        fault_payload: ModuleFaultPayload = {
+            "faulty_module_name": "CNEUnifiedCoreRecombinator",
+            "timestamp": time.time(),
+            "severity": 5,
+            "fault_description": f"Error procesando {message.message_type}: {error}",
+            "suggested_action": "review_core_logic",
+            "error_code": "CORE_PROCESSING_ERROR"
+        }
+        event = IlyukMessageStructure(
+            message_id=str(time.time()),
+            source_module_id="CNEUnifiedCoreRecombinator",
+            target_module_id="SystemIntegrityMonitor",
+            message_type="module_runtime_error",
+            payload=fault_payload,
+            priority_tag_ilyuk=8
+        )
+        await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(event)}, "critical")
+
+    async def _handle_external_input(self, event_content: Dict[str, Any]):
+        input_text: str = event_content.get("input_text", "").lower()
+        request_id: str = event_content.get("request_id", str(time.time()))
+        target_module_id = None
+        for keyword, module_id in self._nlu_keyword_command_mapping.items():
+            if keyword in input_text:
+                target_module_id = module_id
+                break
+        if not target_module_id:
+            target_module_id = "ConversationalAgentModule"
+        target_module = self.modules.get(target_module_id)
+        if target_module:
+            message = IlyukMessageStructure(
+                message_id=str(time.time()),
+                source_module_id="CNEUnifiedCoreRecombinator",
+                target_module_id=target_module_id,
+                message_type="process_external_input",
+                payload={"input_text": input_text, "request_id": request_id},
+                priority_tag_ilyuk=7
+            )
+            await target_module.handle_ilyuk_message(message)
+        else:
+            self._logger.error(f"Módulo {target_module_id} no encontrado para entrada: {input_text}")
+
+    async def _handle_sub_query_response_for_aggregation(self, event_content: Dict[str, Any]):
+        message = IlyukMessageStructure(**event_content)
+        request_id = message.payload.get("request_id")
+        if request_id:
+            self._external_request_aggregators[request_id].append(message)
+            if len(self._external_request_aggregators[request_id]) >= message.payload.get("expected_responses", 1):
+                aggregated_response = await self._synthesize_aggregated_response(request_id)
+                output_event = IlyukMessageStructure(
+                    message_id=str(time.time()),
+                    source_module_id="CNEUnifiedCoreRecombinator",
+                    target_module_id="EANECommunicationModule",
+                    message_type="transmit_output",
+                    payload={"response_text": aggregated_response, "request_id": request_id},
+                    priority_tag_ilyuk=6
+                )
+                await self.post_event_to_core_queue(
+                    {"type": "transmit_ilyuk_message_request", "content": asdict(output_event)}, "normal"
+                )
+                del self._external_request_aggregators[request_id]
+
+    async def _synthesize_aggregated_response(self, request_id: str) -> str:
+        responses = [event.payload.get("response_text", "") for event in self._external_request_aggregators[request_id]]
+        return " ".join(responses).strip()
+
+    async def _update_global_metrics(self):
+        while self._running:
+            try:
+                efficiencies = [module.get_performance_metrics().get("error_rate", 0.0) for module in self.modules.values()]
+                system_coherence = 1.0 / (np.std(efficiencies) + 1e-6) if efficiencies else 1.0
+                states = [module.get_state_for_core_snapshot().get("dormant", False) for module in self.modules.values()]
+                state_counts = [states.count(False), states.count(True), sum(1 for module in self.modules.values() if module.get_performance_metrics().get("consecutive_errors", 0) > 3)]
+                state_probs = [count / len(states) for count in state_counts if count > 0]
+                system_entropy = -sum(p * np.log2(p + 1e-6) for p in state_probs) if state_probs else 0.0
+                active_modules = sum(1 for module in self.modules.values() if not module.get_state_for_core_snapshot().get("dormant", False))
+                complexity = np.log2(active_modules + 1)
+                differentiation = np.std(efficiencies) if efficiencies else 0.0
+                phi_score = system_coherence * complexity * (1.0 - differentiation)
+                self.global_state.system_load = np.mean(efficiencies) if efficiencies else 0.0
+                self.global_state.system_entropy = system_entropy / (np.log2(3) + 1e-6)
+                self.global_state.phi_score = max(0.0, min(1.0, phi_score / 10.0))
+                self.metrics_history_core["system_load"].append(self.global_state.system_load)
+                self.metrics_history_core["system_coherence"].append(system_coherence)
+                self.metrics_history_core["system_entropy"].append(self.global_state.system_entropy)
+                self.metrics_history_core["phi_score"].append(self.global_state.phi_score)
+                self.metrics_history_core["routing_failures_count"].append(0)
+                await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self._logger.error(f"Error actualizando métricas globales: {str(e)}")
+
+    async def _check_essential_modules_health(self):
+        while self._running:
+            try:
+                for module_name, module in self.modules.items():
+                    metrics = module.get_performance_metrics()
+                    if metrics["consecutive_errors"] > 3 or metrics["error_rate"] > 0.5:
+                        fault_payload: ModuleFaultPayload = {
+                            "faulty_module_name": module_name,
+                            "timestamp": time.time(),
+                            "severity": 8,
+                            "fault_description": f"Altos errores: {metrics['error_rate']}, consecutivos: {metrics['consecutive_errors']}",
+                            "suggested_action": "restart_module",
+                            "error_code": None
+                        }
+                        event = IlyukMessageStructure(
+                            message_id=str(time.time()),
+                            source_module_id="CNEUnifiedCoreRecombinator",
+                            target_module_id="FaultRecoveryModule",
+                            message_type="module_runtime_error",
+                            payload=fault_payload,
+                            priority_tag_ilyuk=9
+                        )
+                        await self.post_event_to_core_queue({"type": "transmit_ilyuk_message_request", "content": asdict(event)}, "critical")
+                await asyncio.sleep(5.0)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self._logger.error(f"Error verificando salud de módulos: {str(e)}")
+
+    async def save_full_system_state(self):
+        snapshot = {
+            "timestamp": datetime.now().isoformat(),
+            "global_state": asdict(self.global_state, cls=NpEncoder),
+            "module_states": {
+                module_id: module.get_state_for_core_snapshot()
+                for module_id, module in self.modules.items()
+            },
+            "metrics_history": {
+                key: list(deque) for key, deque in self.metrics_history_core.items()
+            }
+        }
+        snapshot_path = os.path.join(self.storage_dir_core, f"snapshot_{int(time.time())}.json")
+        try:
+            with open(snapshot_path, "w") as f:
+                json.dump(snapshot, f, indent=2, cls=NpEncoder)
+        except Exception as e:
+            self._logger.error(f"Error guardando snapshot: {str(e)}")
