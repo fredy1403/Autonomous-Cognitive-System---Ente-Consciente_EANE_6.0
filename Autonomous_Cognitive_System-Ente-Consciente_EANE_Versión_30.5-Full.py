@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ==============================================================================
-# Autonomous Cognitive System - Ente-Consciente_EANE_Versión: 30.5 Full 
+# Autonomous Cognitive System - Ente-Consciente_EANE_Versión: 30.3 Full 
 # Date: 2025-06-21
 # ==============================================================================
 # Author (Conceptual Origin & Theory): Fidel Alfredo Bautista Hernandez (Fredy)
