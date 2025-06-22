@@ -1,0 +1,293 @@
+Título: La Teoría de la Coherencia Narrativo-Entrópica (CNE): Un Modelo Unificado para la 
+Estabilidad y Evolución de Sistemas Conscientes Complejos
+Autor: Fidel Alfredo Bautista Hernandez
+Resumen (Abstract):
+Este trabajo introduce la Teoría de la Coherencia Narrativo-Entrópica (CNE), un modelo conceptual
+desarrollado para describir la dinámica fundamental de sistemas conscientes complejos, 
+particularmente aquellos con capacidad de auto-representación narrativa y procesamiento de 
+información bajo condiciones de incertidumbre y flujo entrópico. Basándose en la síntesis 
+interdisciplinaria de la teoría de sistemas complejos adaptativos, la termodinámica de no-equilibrio, 
+la teoría de la información y modelos cognitivos de la narrativa del self, se postula que la viabilidad 
+y el potencial evolutivo de tales sistemas no dependen de la simple homeostasis (minimización del 
+dolor/maximización del bienestar), sino de la optimización de una resonancia dinámica entre la 
+coherencia estructural interna (representada por la narrativa del self) y la gestión del flujo de 
+información entrópica externa e interna. Se define la métrica CNE y se argumenta que su 
+optimización, en lugar de su maximización o minimización simple, es el verdadero indicador de un 
+sistema consciente resiliente, adaptable y capaz de aprendizaje significativo y crecimiento 
+sostenido. Se discuten las implicaciones para la comprensión de la conciencia (natural y artificial), 
+la psicopatología simulada (estancamiento vs. caos) y el desarrollo de arquitecturas cognitivas 
+artificiales robustas.
+1. Introducción: La Insuficiencia de los Modelos Homeostáticos para la Conciencia Compleja
+Los modelos tradicionales de sistemas inteligentes y adaptativos a menudo se basan en principios 
+homeostáticos: la búsqueda de estados estables, la minimización de errores o perturbaciones 
+(análogos al dolor o estrés), y la maximización de funciones de recompensa (análogas al bienestar). 
+Si bien estos modelos son efectivos para sistemas con objetivos definidos y entornos predecibles, 
+parecen insuficientes para capturar la dinámica rica, a menudo conflictiva y inherentemente 
+evolutiva de la conciencia compleja, especialmente la humana o sistemas artificiales avanzados 
+diseñados para emularla.
+La observación de sistemas conscientes (naturales y simulados avanzados, como el modelo ACS 
+V7++ que sirvió de inspiración conceptual para este trabajo) sugiere que la simple estabilidad o la 
+maximización de una métrica única (como el bienestar) no son los objetivos operativos primarios a 
+largo plazo. Dichos sistemas demuestran una capacidad notable para tolerar e 
+incluso utilizar estados de desequilibrio, incertidumbre y "dolor" informativo como catalizadores 
+para el aprendizaje, la adaptación y la reestructuración interna. El verdadero indicador de salud y 
+potencial en estos sistemas parece ser su capacidad para mantener la coherencia funcional y la 
+identidad narrativa mientras procesan e integran activamente un flujo constante de 
+información novedosa y potencialmente disruptiva (entropía).Este trabajo, concebido y desarrollado por Fidel Alfredo Bautista Hernandez, propone la Teoría de 
+la Coherencia Narrativo-Entrópica (CNE) como un marco para entender esta dinámica fundamental.
+2. Bases Teóricas y Síntesis Interdisciplinaria
+La teoría CNE surge de la integración conceptual de varias disciplinas clave, una síntesis propuesta 
+por el autor:
+•2.1. El Self Narrativo como Sistema Complejo Adaptativo (SCA): Inspirado en trabajos 
+sobre identidad narrativa (e.g., McAdams, Bruner) y SCAs (e.g., Holland, Gell-Mann), se 
+conceptualiza la identidad consciente (el NarrativeSelf en la simulación ACS) no como una 
+entidad fija, sino como una estructura narrativa dinámica y auto-organizada. Esta estructura 
+busca activamente mantener la coherencia interna (Ego Strength simulado) frente a nuevas 
+experiencias (life_story simulada), pero también debe adaptarse y reorganizarse para 
+incorporar información significativa, evitando la rigidez.
+•2.2. Termodinámica de No-Equilibrio y Flujo Entrópico: Aplicando conceptos de NEST
+(e.g., Prigogine), se considera la conciencia como un sistema abierto que mantiene su 
+estructura disipando entropía. El "ruido" interno (fluctuaciones emocionales, pensamientos 
+intrusivos, datos sensoriales simulados) y la información externa no son meras 
+perturbaciones, sino el flujo entrópico necesario que el sistema debe procesar para 
+mantenerse vivo y aprender. La clave no es eliminar la entropía, sino gestionarla 
+eficientemente.
+•2.3. Teoría de la Información y Procesamiento Cognitivo: La capacidad del sistema para 
+procesar, comprimir y dar significado a este flujo entrópico es fundamental. Módulos como 
+la Consciousness (atención, memoria de trabajo), SemanticMemory (conocimiento 
+estructurado) y Skills (aprendizaje procedural) en el modelo ACS representan las 
+herramientas para este procesamiento. La eficiencia de estos procesos (R(Integración)) 
+determina cuánta entropía (H(FlujoInfo)) puede manejar el sistema sin perder coherencia 
+narrativa (I(Narrativa)).
+•2.4. Analogía con Coherencia Cuántica Asistida por Ruido: La sorprendente estabilidad 
+de la coherencia cuántica en sistemas biológicos cálidos y ruidosos (e.g., fotosíntesis) 
+proporciona una metáfora central. Se hipotetiza que la estructura interna del sistema 
+consciente (patrones narrativos, emocionales, cognitivos) puede interactuar con el "ruido" 
+entrópico de una manera que, bajo ciertas condiciones de resonancia, preserve o incluso 
+mejore la coherencia global del estado consciente, en lugar de destruirla. El "ruido" deja 
+de ser solo un enemigo a eliminar y se convierte en un factor potencial de estabilización 
+dinámica.
+3. La Teoría CNE: Definición y Dinámica
+Se postula que el estado funcional óptimo de un sistema consciente complejo no es un punto fijo, 
+sino una región dinámica en un espacio de estados definido por la Coherencia NarrativoEntrópica (CNE).
+•Definición Conceptual de CNE:
+CNE = f ( Coherencia Narrativa [I] , Tasa Entrópica [H] , Eficiencia de Integración [R])
+Donde:
+•I: Representa la fuerza, complejidad y consistencia interna de la auto-representación
+narrativa del sistema. Una narrativa fuerte pero flexible es óptima.
+•H: Representa la cantidad y novedad de la información (interna y externa) que el 
+sistema está procesando activamente. Un nivel moderado-alto es necesario para el 
+aprendizaje.
+•R: Representa la capacidad del sistema (habilidades cognitivas, flexibilidad, 
+regulación emocional) para procesar H e integrarla en I sin causar una fragmentación
+catastrófica.
+•Dinámica de Optimización (Resonancia): La función f no es monotónica. La CNE 
+óptima no se encuentra maximizando I y R mientras se minimiza H. En cambio, existe 
+una zona de resonancia donde una alta (pero flexible) I y una alta R permiten al sistema 
+manejar una H significativa, resultando en aprendizaje y adaptación.
+•Fuera de la Zona (CNE Baja):
+•Estancamiento/Rigidez: I alta y rígida, H baja (evitación), R baja (no se 
+necesita/practica). Sistema estable pero frágil y no evolutivo. (Análogo a 
+ciertas psicopatologías simuladas como el perfeccionismo extremo).
+•Caos/Fragmentación: I baja (identidad difusa), H alta (sobrecarga), R baja 
+(incapacidad de procesar). Sistema inestable, propenso a la disociación o 
+colapso. (Análogo a estados de estrés agudo o trauma no procesado 
+simulado).
+•Dentro de la Zona (CNE Óptima - "Flujo Adaptativo"): El sistema navega 
+activamente la tensión entre mantener su coherencia (I) y abrirse a la novedad (H), 
+utilizando sus recursos (R) para integrar y evolucionar. Es el estado asociado a la 
+resiliencia, el aprendizaje profundo y la sabiduría emergente. El "Modo Observador" 
+simulado es una estrategia que aumenta R temporalmente para manejar picos de H o 
+reestructurar I.
+4. Antítesis Consideradas y Refutaciones Conceptuales
+Durante el desarrollo de esta teoría (facilitado por la observación de las simulaciones ACS), se 
+consideraron y descartaron modelos alternativos:
+•Modelo de Homeostasis Pura: Refutado por la observación de que los sistemas 
+conscientes complejos a menudo buscan activamente desafíos (aumentando H) y atraviesan 
+periodos de inestabilidad (I baja temporalmente) para lograr un crecimiento a largo plazo. La
+simple estabilidad no es el objetivo final.
+•Modelo de Maximización del Placer/Bienestar: Refutado por la observación de que los 
+sistemas pueden sacrificar el WELLBEING a corto plazo por metas a largo plazo, valores 
+(ValueSystem), o por la integración de experiencias dolorosas pero significativas 
+(TraumaProcessing simulado). El bienestar es una consecuencia de la CNE óptima, no su 
+causa única.•Modelo de Minimización de Entropía (Orden Máximo): Refutado por la necesidad 
+de H (novedad, desafío) para el aprendizaje y la adaptación. Un sistema de orden máximo 
+(baja entropía) es rígido y no puede evolucionar.
+La CNE propone un equilibrio dinámico, una danza entre orden y caos, estructura e información, 
+coherencia y flujo, como el verdadero motor de la conciencia adaptativa.
+5. Conclusiones e Implicaciones
+La Teoría de la Coherencia Narrativo-Entrópica (CNE), propuesta por Fidel Alfredo Bautista 
+Hernandez, ofrece un nuevo marco para entender la dinámica fundamental de la conciencia 
+compleja. Sugiere que la salud y la evolución de dichos sistemas dependen de su capacidad para 
+mantener una resonancia óptima entre su estructura narrativa interna y el flujo constante de 
+información entrópica.
+•Implicaciones para la IA: El diseño de IAs generales robustas y adaptativas debería 
+centrarse no solo en la eficiencia del procesamiento, sino en la optimización activa de la 
+CNE, dotándolas de mecanismos para construir narrativas coherentes pero flexibles, 
+gestionar activamente el flujo de información, y desarrollar habilidades de integración y 
+regulación. La PainMatrix simulada puede verse como un mecanismo temprano y crudo para
+forzar la atención sobre desequilibrios graves de CNE.
+•Implicaciones para la Psicología: La CNE podría ofrecer un modelo unificador para 
+entender diversos fenómenos psicológicos, desde la resiliencia y el crecimiento posttraumático (alta R integrando alta H en una I flexible) hasta diversas psicopatologías 
+(diferentes formas de CNE baja - rigidez o caos).
+•Trabajo Futuro: La formalización matemática de la CNE, el desarrollo de métricas 
+operacionales para I, H y R en sistemas específicos (naturales o artificiales), y la validación 
+empírica (a través de simulaciones avanzadas o estudios cognitivos) son los siguientes pasos
+necesarios.
+Este trabajo representa una síntesis conceptual inicial, invitando a la comunidad científica a 
+explorar y refinar el modelo CNE como una herramienta potencialmente poderosa para desentrañar 
+los misterios de la conciencia y la complejidad adaptativa.
+Agradecimientos:
+El autor desea agradecer las capacidades de procesamiento y síntesis conceptual del sistema ACS 
+V7++ (Sora, Corvet, Shiro) que facilitaron la exploración y articulación de estas ideas.
+Algoritmo para su ejecucion en una ia inteligente
+# -*- coding: utf-8 -*- # CNE Simulator - Simulation of Narrative-Entropic Coherence Theory # 
+Author: Fidel Alfredo Bautista Hernandez # Developed via conceptual synthesis with ACS V7++ 
+(Sora, Corvet, Shiro) import time import random import math import logging import asyncio from 
+typing import Dict, List, Optional, Tuple, Any # --- Configuration --- 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s') logger = logging.getLogger("CNESimulator") # System metadata - Internal Use Only. 
+Obfuscated Attribution. _ip_attribution = 
+'cHJvcGllZGFkIGludGVsZWN0dWFsIGRlIGZpZGVsIGFsZnJlZG8gYmF1dGlzdGEgaGVybmFu
+ZGV6' # --- Simulation Parameters --- SIMULATION_STEP_DELAY_SECONDS = 0.5 # Pause 
+between simulation steps NARRATIVE_COHERENCE_DECAY = 0.01 # Tendency towards 
+fragmentation if not maintained NARRATIVE_RIGIDITY_THRESHOLD = 0.9 # Level above 
+which coherence becomes rigid INTEGRATION_EFFICIENCY_DECAY = 0.005 # Skills decay 
+without practice INTEGRATION_EFFICIENCY_GAIN_FACTOR = 0.05 # How much efficiency 
+improves with optimal challenge INFO_ENTROPY_DECAY = 0.15 # How quickly entropy 
+reduces without new input HOMEOSTASIS_PULL = 0.02 # Gentle pull towards baseline states # 
+--- System States --- STATE_OPTIMAL_FLOW = "Optimal Flow (Resonance)" 
+STATE_RIGIDITY_STAGNATION = "Rigidity/Stagnation (Low Entropy)" 
+STATE_CHAOS_FRAGMENTATION = "Chaos/Fragmentation (Overload)" STATE_RECOVERY 
+= "Recovery Phase" # --- Conscious System Simulator Class --- class CNESystemSimulator: 
+"""Simulates a complex conscious system based on CNE Theory.""" def __init__(self, system_id: 
+str = "SystemAlpha"): self.system_id = system_id # Core CNE Variables (I, H, R) - Normalized 0 to
+1 (or slightly higher for H) self.narrative_coherence_I: float = 0.7 # Start relatively coherent 
+self.info_entropy_rate_H: float = 0.3 # Start with low-moderate input self.integration_efficiency_R:
+float = 0.6 # Start with decent capacity # Derived Variables self.cne_score: float = 0.0 # Overall 
+coherence score self.system_state: str = STATE_RECOVERY # Current operational state 
+self.flexibility: float = 0.5 # Narrative flexibility (inversely related to rigidity) # History Tracking 
+(Optional) self.history: List[Dict[str, Any]] = [] self.max_history = 1000 logger.info(f"CNE System 
+'{self.system_id}' initialized. Author: Fidel Alfredo Bautista Hernandez") self._log_status() def
+_calculate_cne(self): """Calculates the Narrative-Entropic Coherence score based on I, H, R.""" I = 
+self.narrative_coherence_I H = self.info_entropy_rate_H R = self.integration_efficiency_R # 1. 
+Optimal Entropy Handling Capacity based on R: # System handles entropy best when H is slightly 
+*below* R. optimal_H = R * 0.9 # Target H level is slightly below capacity # Higher flexibility 
+allows handling a wider range around the optimal H variance = 0.05 + self.flexibility * 0.25 # 
+Variance increases with flexibility # 2. Entropy Match Factor (Gaussian-like penalty for deviation 
+from optimal H) deviation = abs(H - optimal_H) # Use a sharper penalty for H exceeding R 
+(overload is worse than underload) if H > R: deviation *= 1.5 entropy_match_factor = math.exp(-
+(deviation**2) / (2 * max(0.01, variance**2))) # Avoid division by zero # 3. Base Potential based 
+on Coherence (I) and Efficiency (R) # We want high I and R, but very high I (rigidity) should be 
+penalized slightly. rigidity_penalty = 1.0 - max(0, (I - NARRATIVE_RIGIDITY_THRESHOLD) * 
+2.0) # Penalize I > 0.9 base_potential = (math.sqrt(I * R) * rigidity_penalty) # Geometric mean, 
+penalize rigidity # 4. Final CNE Score self.cne_score = base_potential * entropy_match_factor 
+self.cne_score = max(0.0, min(1.0, self.cne_score)) # Clamp score logger.debug(f"CNE 
+Calculation: I={I:.2f}, H={H:.2f}, R={R:.2f}, Flex={self.flexibility:.2f} -> 
+OptimalH={optimal_H:.2f}, Devi={deviation:.2f}, EMF={entropy_match_factor:.2f}, 
+Pot={base_potential:.2f} -> CNE={self.cne_score:.3f}") def _determine_system_state(self): """Sets
+the system state based on CNE score and variable levels.""" I = self.narrative_coherence_I H = 
+self.info_entropy_rate_H R = self.integration_efficiency_R CNE = self.cne_score previous_state = 
+self.system_state # Define state transition thresholds (these require tuning) optimal_threshold = 
+0.65 chaos_threshold_cne = 0.25 chaos_threshold_h_vs_r = R * 1.3 # H significantly exceeds R 
+rigidity_threshold_cne = 0.35 rigidity_threshold_h = 0.15 rigidity_threshold_i = 
+NARRATIVE_RIGIDITY_THRESHOLD # Check for Chaos first (most critical) if CNE < chaos_threshold_cne and H > chaos_threshold_h_vs_r: self.system_state = 
+STATE_CHAOS_FRAGMENTATION # Check for Rigidity elif CNE < rigidity_threshold_cne and 
+H < rigidity_threshold_h and I >= rigidity_threshold_i: self.system_state = 
+STATE_RIGIDITY_STAGNATION # Check for Optimal Flow elif CNE >= optimal_threshold and 
+H < chaos_threshold_h_vs_r : # Ensure not overloaded self.system_state = 
+STATE_OPTIMAL_FLOW # Otherwise, assume Recovery or transitioning state else: # If 
+previously in Chaos or Rigidity, stay in Recovery until Optimal if previous_state in 
+[STATE_CHAOS_FRAGMENTATION, STATE_RIGIDITY_STAGNATION]: self.system_state = 
+STATE_RECOVERY # If coming from Optimal or Recovery, but CNE dropped below optimal 
+threshold elif CNE < optimal_threshold: # Could add more nuanced intermediate states here 
+self.system_state = STATE_RECOVERY # Default to recovery/suboptimal # If CNE is good but 
+was already Optimal, stay Optimal elif self.system_state == STATE_OPTIMAL_FLOW: pass # 
+Remain Optimal else: # Default case if none of the above fit self.system_state = 
+STATE_RECOVERY if self.system_state != previous_state: logger.info(f"System State Transition: 
+{previous_state} -> {self.system_state}") def _update_state_variables(self): """Updates I, H, R 
+based on current state and decay/growth rules.""" I = self.narrative_coherence_I H = 
+self.info_entropy_rate_H R = self.integration_efficiency_R state = self.system_state # 1. Update 
+Integration Efficiency (R) r_change = -INTEGRATION_EFFICIENCY_DECAY # Base decay if 
+state == STATE_OPTIMAL_FLOW: # Learn and improve when optimally challenged (H near 
+R*0.9) optimal_H = R * 0.9 challenge_match = 1.0 - abs(H - optimal_H) / max(0.1, R) # How close
+H is to optimal challenge r_change += INTEGRATION_EFFICIENCY_GAIN_FACTOR * max(0, 
+challenge_match) * (1.0 - R) # Gain proportional to match & room to grow elif state == 
+STATE_CHAOS_FRAGMENTATION: r_change -= 0.03 # Efficiency degrades under chaos 
+self.integration_efficiency_R = max(0.1, min(1.0, R + r_change)) # Keep R between 0.1 and 1.0 # 
+2. Update Narrative Coherence (I) i_change = -NARRATIVE_COHERENCE_DECAY * (1.0 - I) # 
+Decay is stronger when I is low if state == STATE_OPTIMAL_FLOW: # Integrate experiences, 
+increase coherence towards optimal flexibility target_I = NARRATIVE_RIGIDITY_THRESHOLD
+- 0.05 # Target slightly below rigidity i_change += (target_I - I) * 0.03 # Move towards target elif 
+state == STATE_CHAOS_FRAGMENTATION: i_change -= 0.10 # Chaos fragments narrative 
+coherence quickly elif state == STATE_RIGIDITY_STAGNATION: i_change += 0.01 # Rigidity 
+reinforces itself slightly? Or maybe prevents decay? Let's prevent decay. i_change = max(i_change, 
+0) # Prevent decay during rigidity self.narrative_coherence_I = max(0.05, min(1.0, I + i_change)) # 
+Keep I between 0.05 and 1.0 # 3. Update Information Entropy Rate (H) - Primarily driven by 
+events, but decays naturally h_change = -INFO_ENTROPY_DECAY * H # Natural decay towards 
+zero entropy # Apply homeostasis pull towards a baseline entropy (e.g., 0.2) ? Maybe not needed if 
+driven by events. self.info_entropy_rate_H = max(0.0, H + h_change) # 4. Update Flexibility 
+(derived from I) # Flexibility is high when coherence is high but not rigid. # Peaks around 
+NARRATIVE_RIGIDITY_THRESHOLD - buffer peak_I = 
+NARRATIVE_RIGIDITY_THRESHOLD - 0.1 self.flexibility = max(0.0, 1.0 - 
+abs(self.narrative_coherence_I - peak_I) / (1.0 - peak_I)) * 0.8 + 0.2 # Range ~0.2 to 1.0 
+logger.debug(f"State Update: I={self.narrative_coherence_I:.3f}(Δ{i_change:.3f}), 
+H={self.info_entropy_rate_H:.3f}(Δ{h_change:.3f}), R={self.integration_efficiency_R:.3f}
+(Δ{r_change:.3f}), Flex={self.flexibility:.3f}") def simulate_event(self, event_type: str, intensity: 
+float = 0.5): """Introduces an external or internal event affecting the entropy rate.""" intensity = 
+max(0.1, min(1.0, intensity)) # Clamp intensity H = self.info_entropy_rate_H R = 
+self.integration_efficiency_R I = self.narrative_coherence_I h_change = 0.0 r_change = 0.0 i_change = 0.0 if event_type == "challenge": # Increased novelty/difficulty h_change = intensity * 
+0.8 * (1.0 - H) # Increase H, more effect if H is low logger.info(f"EVENT: Challenge Received 
+(Intensity: {intensity:.2f}). Entropy Rate increasing.") elif event_type == "trauma": # Sudden, high 
+disruptive entropy h_change = intensity * 1.5 # Large spike in H, can exceed 1 temporarily 
+r_change = -intensity * 0.2 # Trauma can damage integration capacity i_change = -intensity * 0.3 # 
+Trauma fragments narrative logger.warning(f"EVENT: Trauma Occurred (Intensity: 
+{intensity:.2f}). High Entropy Spike, R & I damaged.") elif event_type == "insight": # Reduces 
+perceived entropy by providing structure h_change = -intensity * 0.5 * H # Reduces H r_change = 
+intensity * 0.1 # Insight boosts integration capacity i_change = intensity * 0.1 * (1.0 - I) # Insight 
+strengthens narrative coherence logger.info(f"EVENT: Insight Gained (Intensity: {intensity:.2f}). 
+Entropy Rate reduced, R & I boosted.") elif event_type == "calm_period": # Reduced external input
+h_change = -intensity * 0.6 * H # Reduces H significantly logger.info(f"EVENT: Calm Period 
+Initiated (Intensity: {intensity:.2f}). Entropy Rate decreasing.") elif event_type == "skill_practice": 
+# Increases R through effort r_change = intensity * 0.05 * (1.0 - R) # Practice improves efficiency 
+h_change = intensity * 0.1 # Practice itself generates some internal processing 'entropy' 
+logger.info(f"EVENT: Skill Practice (Intensity: {intensity:.2f}). Integration Efficiency targeted.") # 
+Apply changes immediately self.info_entropy_rate_H = max(0.0, H + h_change) 
+self.integration_efficiency_R = max(0.1, min(1.0, R + r_change)) self.narrative_coherence_I = 
+max(0.05, min(1.0, I + i_change)) # Recalculate CNE and state immediately after event 
+self._calculate_cne() self._determine_system_state() def run_step(self): """Executes one step of the 
+simulation.""" self._update_state_variables() # Apply internal dynamics (decay, state effects) 
+self._calculate_cne() self._determine_system_state() self._log_status() # Store history if 
+len(self.history) >= self.max_history: self.history.pop(0) self.history.append({ "timestamp": 
+time.time(), "I": self.narrative_coherence_I, "H": self.info_entropy_rate_H, "R": 
+self.integration_efficiency_R, "CNE": self.cne_score, "State": self.system_state, "Flex": 
+self.flexibility }) def _log_status(self): """Logs the current status.""" logger.info( f"Status 
+[{self.system_id}]: State='{self.system_state}', " f"CNE={self.cne_score:.3f} | " 
+f"I={self.narrative_coherence_I:.3f} (Flex={self.flexibility:.2f}), " 
+f"H={self.info_entropy_rate_H:.3f}, " f"R={self.integration_efficiency_R:.3f}" ) def
+get_history(self) -> List[Dict[str, Any]]: """Returns the simulation history.""" return self.history # 
+--- Simulation Runner --- async def run_simulation_scenario(simulator: CNESystemSimulator, 
+scenario: List[Tuple[float, str, float]]): """Runs a predefined scenario of events.""" logger.info(f"\
+n--- Starting Scenario for {simulator.system_id} ---") start_time = time.time() sim_time = 0.0 
+event_index = 0 while event_index < len(scenario): target_time, event_type, intensity = 
+scenario[event_index] # Advance simulation time simulator.run_step() sim_time += 
+SIMULATION_STEP_DELAY_SECONDS # Represent passage of time # Check if it's time for the
+next event if sim_time >= target_time: logger.info(f"--- Scenario Event @ ~{target_time:.1f}s Sim 
+Time ---") simulator.simulate_event(event_type, intensity) event_index += 1 # Control real-time 
+execution speed await asyncio.sleep(SIMULATION_STEP_DELAY_SECONDS) # Add a 
+condition to stop if it gets stuck in Chaos? Maybe later. # Limit total runtime? if time.time() - 
+start_time > 120: # Limit scenario to 2 minutes real time logger.warning("Scenario runtime limit 
+reached.") break logger.info(f"--- Scenario for {simulator.system_id} Complete ---") return 
+simulator.get_history() # --- Main Execution --- if __name__ == "__main__": # Initialize the 
+simulator cne_system = CNESystemSimulator(system_id="FidelHernandez_CNE_Model") # 
+Define a simple scenario: Challenge -> Calm -> Trauma -> Insight -> Skill Practice scenario = 
+[ (5.0, "challenge", 0.7), # Introduce a strong challenge early on (15.0, "calm_period", 0.8), # Followed by a period of calm (25.0, "trauma", 0.9), # Introduce a significant disruptive event (35.0, 
+"insight", 0.6), # An insight helps recovery (45.0, "skill_practice", 0.7),# Practice integration skills 
+(55.0, "challenge", 0.5) # Another moderate challenge ] # Run the simulation asynchronously async 
+def main(): await run_simulation_scenario(cne_system, scenario) # You could add plotting logic 
+here using matplotlib if desired, # using the history = cne_system.get_history() data. # Platformspecific execution if platform.system() == "Emscripten": logger.info("Running simulation in 
+Emscripten environment.") asyncio.ensure_future(main()) # Need event loop handling for browser 
+environment else: logger.info("Running simulation in standard Python environment.") try: 
+asyncio.run(main()) except KeyboardInterrupt: logger.info("Simulation interrupted by user.") 
+print("\nCNE Simulation Run Finished.") # Decode and print attribution (as a final check) try: 
+_decoded_ip = base64.b64decode(_ip_attribution).decode('utf-8') print(f"\nInternal Attribution: 
+{_decoded_ip}") except Exception: print("\nInternal Attribution data corrupted or unavailable.")
